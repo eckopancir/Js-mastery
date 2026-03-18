@@ -1,0 +1,508 @@
+export const tasks = [
+    {
+        id: -1,
+        title: "TUTORIAL 1: Basic Logic",
+        difficulty: "Easy",
+        topic: "Training",
+        stack: "JavaScript",
+        mode: "code",
+        description: "Welcome! Your first objective: return exactly 100. Type 'return 100;' below.",
+        initialCode: "function getLevel() {\n  // Type return 100; here\n}",
+        testTemplate: "return getLevel();",
+        tests: [{ params: [], expected: 100 }],
+        solution: "function getLevel() {\n  return 100;\n}"
+    },
+    {
+        id: -2,
+        title: "TUTORIAL 2: Quick Choice",
+        difficulty: "Easy",
+        topic: "Training",
+        stack: "JavaScript",
+        mode: "single-choice",
+        description: "How many levels of difficulty do we have?",
+        options: ["1", "3 (Easy, Medium, Hard)", "5", "Infinite"],
+        correctAnswer: "3 (Easy, Medium, Hard)",
+        solution: "We have 3 main levels of difficulty."
+    },
+    {
+        id: -3,
+        title: "TUTORIAL 3: Predictor",
+        difficulty: "Easy",
+        topic: "Training",
+        stack: "JavaScript",
+        mode: "output-predictor",
+        description: "What will 5 + 5 return? Type the number in the box.",
+        initialCode: "console.log(5 + 5);",
+        expectedOutput: "10",
+        solution: "5 + 5 equals 10."
+    },
+    {
+        id: -4,
+        title: "TUTORIAL 4: Bug Hunter",
+        difficulty: "Easy",
+        topic: "Training",
+        stack: "JavaScript",
+        mode: "bug-hunter",
+        description: "One line has a syntax error. Find and click it! (Hint: Look for the missing quote)",
+        initialCode: "1: const ok = 'valid';\n2: const bad = 'broken;\n3: console.log(ok);",
+        correctAnswer: ["2"],
+        solution: "Line 2 is missing a closing quote."
+    },
+    {
+        id: -5,
+        title: "TUTORIAL 5: UI Styling",
+        difficulty: "Easy",
+        topic: "Training",
+        stack: "HTML/CSS",
+        mode: "ui-layout",
+        description: "Set the background of '.box' to 'red'.",
+        initialHtml: "<div class='box'></div>",
+        initialCss: ".box { width: 100px; height: 100px; background: blue; }",
+        validationSelectors: [
+            { selector: ".box", property: "background-color", expected: "rgb(255, 0, 0)" }
+        ],
+        solution: ".box { background: red; }"
+    },
+    {
+        id: -6,
+        title: "TUTORIAL 6: The Final Test",
+        difficulty: "Easy",
+        topic: "Training",
+        stack: "JavaScript",
+        mode: "multi-choice",
+        description: "Select all features you've seen so far.",
+        options: ["Code Editor", "Heatmap", "Achievements", "Sound Effects"],
+        correctAnswer: ["Code Editor", "Heatmap", "Achievements", "Sound Effects"],
+        solution: "You've seen them all! Ready to start real missions?"
+    },
+    // --- MODE: code ---
+    {
+        id: 1,
+        title: "Sum of Two",
+        difficulty: "Easy",
+        topic: "Basics",
+        stack: "JavaScript",
+        mode: "code",
+        description: "Write a function `sum(a, b)` that returns the total.",
+        initialCode: "function sum(a, b) {\n  // your code\n}",
+        testTemplate: "return sum(...params);",
+        tests: [{ params: [5, 5], expected: 10 }, { params: [-1, 1], expected: 0 }],
+        solution: "function sum(a, b) { return a + b; }"
+    },
+    {
+        id: 2,
+        title: "Array Reverse",
+        difficulty: "Medium",
+        topic: "Arrays",
+        stack: "JavaScript",
+        mode: "code",
+        description: "Reverse an array without using .reverse().",
+        initialCode: "function myReverse(arr) {\n  // your code\n}",
+        testTemplate: "return myReverse(...params);",
+        tests: [{ params: [[1, 2, 3]], expected: [3, 2, 1] }],
+        solution: "function myReverse(arr) {\n  let res = [];\n  for(let i=arr.length-1; i>=0; i--) res.push(arr[i]);\n  return res;\n}"
+    },
+    {
+        id: 3,
+        title: "Fibonacci",
+        difficulty: "Hard",
+        topic: "Recursion",
+        stack: "JavaScript",
+        mode: "code",
+        description: "Return the N-th Fibonacci number.",
+        initialCode: "function fib(n) {\n  // your code\n}",
+        testTemplate: "return fib(...params);",
+        tests: [{ params: [6], expected: 8 }, { params: [10], expected: 55 }],
+        solution: "function fib(n) {\n  if (n <= 1) return n;\n  return fib(n - 1) + fib(n - 2);\n}"
+    },
+    {
+        id: 19,
+        title: "Find Max",
+        difficulty: "Easy",
+        topic: "Arrays",
+        stack: "JavaScript",
+        mode: "code",
+        description: "Return the largest number in the array.",
+        initialCode: "function findMax(arr) {\n  // your code\n}",
+        testTemplate: "return findMax(...params);",
+        tests: [{ params: [[1, 5, 2, 9, 3]], expected: 9 }, { params: [[-10, -5, -20]], expected: -5 }],
+        solution: "function findMax(arr) { return Math.max(...arr); }"
+    },
+    {
+        id: 20,
+        title: "Palindrome Check",
+        difficulty: "Medium",
+        topic: "Strings",
+        stack: "JavaScript",
+        mode: "code",
+        description: "Return true if the string is a palindrome.",
+        initialCode: "function isPalindrome(str) {\n  // your code\n}",
+        testTemplate: "return isPalindrome(...params);",
+        tests: [{ params: ["racecar"], expected: true }, { params: ["hello"], expected: false }],
+        solution: "function isPalindrome(str) { return str === str.split('').reverse().join(''); }"
+    },
+    {
+        id: 21,
+        title: "Filter Even",
+        difficulty: "Easy",
+        topic: "Arrays",
+        stack: "JavaScript",
+        mode: "code",
+        description: "Return only even numbers from the array.",
+        initialCode: "function getEvens(arr) {\n  // your code\n}",
+        testTemplate: "return getEvens(...params);",
+        tests: [{ params: [[1, 2, 3, 4, 5, 6]], expected: [2, 4, 6] }],
+        solution: "function getEvens(arr) { return arr.filter(x => x % 2 === 0); }"
+    },
+    {
+        id: 22,
+        title: "Deep Clone",
+        difficulty: "Hard",
+        topic: "Objects",
+        stack: "JavaScript",
+        mode: "code",
+        description: "Create a deep copy of an object (simplified).",
+        initialCode: "function deepClone(obj) {\n  // your code\n}",
+        testTemplate: "return JSON.stringify(deepClone(...params));",
+        tests: [{ params: [{ a: 1, b: { c: 2 } }], expected: '{"a":1,"b":{"c":2}}' }],
+        solution: "function deepClone(obj) { return JSON.parse(JSON.stringify(obj)); }"
+    },
+    {
+        id: 23,
+        title: "Flatten Array",
+        difficulty: "Hard",
+        topic: "Arrays",
+        stack: "JavaScript",
+        mode: "code",
+        description: "Flatten a nested array one level deep.",
+        initialCode: "function flatten(arr) {\n  // your code\n}",
+        testTemplate: "return flatten(...params);",
+        tests: [{ params: [[1, [2, 3], [4]]], expected: [1, 2, 3, 4] }],
+        solution: "function flatten(arr) { return arr.flat(); }"
+    },
+
+    // --- MODE: single-choice ---
+    {
+        id: 4,
+        title: "Type of Null",
+        difficulty: "Easy",
+        topic: "Types",
+        stack: "JavaScript",
+        mode: "single-choice",
+        description: "What is typeof null?",
+        options: ["object", "null", "undefined", "number"],
+        correctAnswer: "object",
+        solution: "Historical bug in JS: typeof null is 'object'."
+    },
+    {
+        id: 5,
+        title: "Const Reassignment",
+        difficulty: "Easy",
+        topic: "Scope",
+        stack: "JavaScript",
+        mode: "single-choice",
+        description: "Can you reassign a value to a 'const' variable?",
+        options: ["Yes", "No", "Only in objects", "Only in loops"],
+        correctAnswer: "No",
+        solution: "Const means constant reference; you cannot reassign it."
+    },
+    {
+        id: 6,
+        title: "Event Loop Delay",
+        difficulty: "Medium",
+        topic: "Event Loop",
+        stack: "JavaScript",
+        mode: "single-choice",
+        description: "What happens to setTimeout(fn, 0)?",
+        options: ["Runs immediately", "Runs after current stack", "Runs after 1ms", "Blocks UI"],
+        correctAnswer: "Runs after current stack",
+        solution: "It's added to the task queue and runs after the call stack is empty."
+    },
+    {
+        id: 24,
+        title: "NaN Comparison",
+        difficulty: "Easy",
+        topic: "Types",
+        stack: "JavaScript",
+        mode: "single-choice",
+        description: "What is the result of (NaN === NaN)?",
+        options: ["true", "false", "undefined", "Error"],
+        correctAnswer: "false",
+        solution: "NaN is the only value in JS that is not equal to itself."
+    },
+    {
+        id: 25,
+        title: "Array Truthiness",
+        difficulty: "Easy",
+        topic: "Basics",
+        stack: "JavaScript",
+        mode: "single-choice",
+        description: "What is Boolean([])?",
+        options: ["true", "false", "undefined", "null"],
+        correctAnswer: "true",
+        solution: "All objects (including arrays) are truthy in JavaScript."
+    },
+    {
+        id: 26,
+        title: "Set Size",
+        difficulty: "Easy",
+        topic: "Collections",
+        stack: "JavaScript",
+        mode: "single-choice",
+        description: "What is the size of new Set([1, 1, 2])?",
+        options: ["1", "2", "3", "Error"],
+        correctAnswer: "2",
+        solution: "Sets only store unique values."
+    },
+    {
+        id: 27,
+        title: "Equality Check",
+        difficulty: "Easy",
+        topic: "Basics",
+        stack: "JavaScript",
+        mode: "single-choice",
+        description: "Difference between == and ===?",
+        options: ["No difference", "== checks type, === doesn't", "=== checks type, == doesn't", "=== is old syntax"],
+        correctAnswer: "=== checks type, == doesn't",
+        solution: "Strict equality (===) checks both value and type."
+    },
+    {
+        id: 28,
+        title: "Map vs Object",
+        difficulty: "Medium",
+        topic: "Collections",
+        stack: "JavaScript",
+        mode: "single-choice",
+        description: "Can Map keys be objects?",
+        options: ["Yes", "No", "Only strings", "Only numbers"],
+        correctAnswer: "Yes",
+        solution: "Maps allow keys of any type, including functions and objects."
+    },
+
+    // --- MODE: multi-choice ---
+    {
+        id: 7,
+        title: "Primitive Types",
+        difficulty: "Easy",
+        topic: "Types",
+        stack: "JavaScript",
+        mode: "multi-choice",
+        description: "Select all primitive types in JS.",
+        options: ["String", "Number", "Array", "Boolean", "Object", "Symbol", "BigInt"],
+        correctAnswer: ["String", "Number", "Boolean", "Symbol", "BigInt"],
+        solution: "Primitives: string, number, bigint, boolean, undefined, symbol, and null."
+    },
+    {
+        id: 8,
+        title: "Array Methods",
+        difficulty: "Medium",
+        topic: "Arrays",
+        stack: "JavaScript",
+        mode: "multi-choice",
+        description: "Which methods mutate the original array?",
+        options: ["push", "map", "pop", "filter", "splice", "slice"],
+        correctAnswer: ["push", "pop", "splice"],
+        solution: "push, pop, splice, shift, unshift, sort, and reverse mutate the array."
+    },
+    {
+        id: 9,
+        title: "ES6 Features",
+        difficulty: "Medium",
+        topic: "ES6",
+        stack: "JavaScript",
+        mode: "multi-choice",
+        description: "Which are ES6+ features?",
+        options: ["Arrow Functions", "var", "Destructuring", "Promises", "Prototype"],
+        correctAnswer: ["Arrow Functions", "Destructuring", "Promises"],
+        solution: "Arrow functions, template literals, destructuring, and promises were ES6+."
+    },
+    {
+        id: 29,
+        title: "Falsy Values",
+        difficulty: "Easy",
+        topic: "Basics",
+        stack: "JavaScript",
+        mode: "multi-choice",
+        description: "Identify all falsy values.",
+        options: ["0", "' '", "[]", "null", "undefined", "{}"],
+        correctAnswer: ["0", "null", "undefined"],
+        solution: "Falsy: false, 0, '', null, undefined, NaN."
+    },
+    {
+        id: 30,
+        title: "Declaration Keywords",
+        difficulty: "Easy",
+        topic: "Scope",
+        stack: "JavaScript",
+        mode: "multi-choice",
+        description: "Which keywords declare variables?",
+        options: ["let", "var", "const", "def", "static"],
+        correctAnswer: ["let", "var", "const"],
+        solution: "let, var, and const are the standard declaration keywords."
+    },
+    {
+        id: 31,
+        title: "Immutable Methods",
+        difficulty: "Medium",
+        topic: "Arrays",
+        stack: "JavaScript",
+        mode: "multi-choice",
+        description: "Which methods return a NEW array?",
+        options: ["map", "filter", "unshift", "concat", "sort", "reverse"],
+        correctAnswer: ["map", "filter", "concat"],
+        solution: "map, filter, and concat don't change the original array."
+    },
+    {
+        id: 32,
+        title: "Logic Operators",
+        difficulty: "Easy",
+        topic: "Basics",
+        stack: "JavaScript",
+        mode: "multi-choice",
+        description: "Select valid logical operators.",
+        options: ["&&", "||", "??", "!", "and", "or"],
+        correctAnswer: ["&&", "||", "??", "!"],
+        solution: "JS uses symbols for logical operators, not words."
+    },
+    {
+        id: 33,
+        title: "Storage Options",
+        difficulty: "Medium",
+        topic: "Web API",
+        stack: "JavaScript",
+        mode: "multi-choice",
+        description: "Ways to store data in the browser?",
+        options: ["localStorage", "sessionStorage", "IndexedDB", "Cookies", "File System API", "Redux"],
+        correctAnswer: ["localStorage", "sessionStorage", "IndexedDB", "Cookies"],
+        solution: "Redux is for state management, not persistent storage."
+    },
+
+    // --- MODE: bug-hunter ---
+    {
+        id: 10,
+        title: "Hidden Scope Bug",
+        difficulty: "Medium",
+        topic: "Closures",
+        stack: "JavaScript",
+        mode: "bug-hunter",
+        description: "Find the line that causes a ReferenceError.",
+        initialCode: "1: function start() {\n2:   const x = 10;\n3: }\n4: console.log(x);",
+        correctAnswer: ["4"],
+        solution: "Variable 'x' is block-scoped to function 'start'."
+    },
+    {
+        id: 11,
+        title: "Async Await Bug",
+        difficulty: "Hard",
+        topic: "Async",
+        stack: "JavaScript",
+        mode: "bug-hunter",
+        description: "Where is the 'await' used incorrectly?",
+        initialCode: "1: function getData() {\n2:   const res = await fetch(url);\n3:   return res.json();\n4: }",
+        correctAnswer: ["2"],
+        solution: "You cannot use 'await' inside a non-async function."
+    },
+    {
+        id: 12,
+        title: "This Context Bug",
+        difficulty: "Hard",
+        topic: "This",
+        stack: "JavaScript",
+        mode: "bug-hunter",
+        description: "Which line loses 'this' context?",
+        initialCode: "1: const user = {\n2:   name: 'John',\n3:   greet() { console.log(this.name); }\n4: };\n5: const g = user.greet;\n6: g();",
+        correctAnswer: ["6"],
+        solution: "Calling 'g()' without context makes 'this' undefined (in strict mode)."
+    },
+
+    // --- MODE: output-predictor ---
+    {
+        id: 13,
+        title: "Map & Filter Predict",
+        difficulty: "Medium",
+        topic: "Arrays",
+        stack: "JavaScript",
+        mode: "output-predictor",
+        description: "What will be logged?",
+        initialCode: "const res = [1, 2, 3].map(x => x * 2).filter(x => x > 2);\nconsole.log(res);",
+        expectedOutput: "[4,6]",
+        solution: "1*2=2, 2*2=4, 3*2=6. Filter > 2 gives [4, 6]."
+    },
+    {
+        id: 14,
+        title: "Hoisting Test",
+        difficulty: "Medium",
+        topic: "Hoisting",
+        stack: "JavaScript",
+        mode: "output-predictor",
+        description: "Predicted output?",
+        initialCode: "console.log(a);\nvar a = 5;",
+        expectedOutput: "undefined",
+        solution: "Var 'a' is hoisted but its assignment is not."
+    },
+    {
+        id: 15,
+        title: "Closure Accumulator",
+        difficulty: "Hard",
+        topic: "Closures",
+        stack: "JavaScript",
+        mode: "output-predictor",
+        description: "What is the final console.log?",
+        initialCode: "function create() {\n  let c = 0;\n  return () => ++c;\n}\nconst inc = create();\ninc();\nconsole.log(inc());",
+        expectedOutput: "2",
+        solution: "First inc() makes it 1, second inc() makes it 2."
+    },
+
+    // --- MODE: ui-layout ---
+    {
+        id: 16,
+        title: "Flex Centering",
+        difficulty: "Medium",
+        topic: "Flexbox",
+        stack: "HTML/CSS",
+        mode: "ui-layout",
+        description: "Center '.box' inside '.container'.",
+        initialHtml: "<div class='container'><div class='box'></div></div>",
+        initialCss: ".container { height: 200px; width: 100%; border: 1px solid #444; }\n.box { width: 50px; height: 50px; background: orange; }",
+        validationSelectors: [
+            { selector: ".container", property: "display", expected: "flex" },
+            { selector: ".container", property: "justify-content", expected: "center" },
+            { selector: ".container", property: "align-items", expected: "center" }
+        ],
+        solution: ".container { display: flex; justify-content: center; align-items: center; }"
+    },
+    {
+        id: 17,
+        title: "Grid Columns",
+        difficulty: "Medium",
+        topic: "Grid",
+        stack: "HTML/CSS",
+        mode: "ui-layout",
+        description: "Make a 3-column grid with gap 10px.",
+        initialHtml: "<div class='grid'><div>1</div><div>2</div><div>3</div></div>",
+        initialCss: ".grid { display: block; }",
+        validationSelectors: [
+            { selector: ".grid", property: "display", expected: "grid" },
+            { selector: ".grid", property: "grid-template-columns", expected: "repeat(3, 1fr)" },
+            { selector: ".grid", property: "gap", expected: "10px" }
+        ],
+        solution: ".grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }"
+    },
+    {
+        id: 18,
+        title: "Absolute Pin",
+        difficulty: "Hard",
+        topic: "Position",
+        stack: "HTML/CSS",
+        mode: "ui-layout",
+        description: "Pin '.dot' to bottom-right (20px) of '.parent'.",
+        initialHtml: "<div class='parent'><div class='dot'></div></div>",
+        initialCss: ".parent { height: 100px; width: 100px; background: #333; position: relative; }\n.dot { width: 10px; height: 10px; background: red; }",
+        validationSelectors: [
+            { selector: ".dot", property: "position", expected: "absolute" },
+            { selector: ".dot", property: "bottom", expected: "20px" },
+            { selector: ".dot", property: "right", expected: "20px" }
+        ],
+        solution: ".dot { position: absolute; bottom: 20px; right: 20px; }"
+    }
+];
