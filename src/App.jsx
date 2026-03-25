@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import Editor from '@monaco-editor/react';
 import {
-    Play, CheckCircle, XCircle, ChevronLeft, ChevronRight,
+    Play, CheckCircle, XCircle, ChevronLeft, ChevronRight, ChevronDown,
     Trophy, Code2, Layers, BookOpen, ArrowUpCircle, ArrowDownCircle,
     Tag, Terminal, Clock, Eye, List, BarChart2, Calendar, Lock, Search, Filter,
-    Sparkles, Award, Zap, Wand2
+    Sparkles, Award, Zap, Wand2, Shield, Copy, ExternalLink, PlayCircle, FileJson, X, Info
 } from 'lucide-react';
 import { tasks } from './tasks';
 import { playSound } from './utils/sounds';
@@ -142,6 +142,29 @@ function App() {
     const [code, setCode] = useState('');
     const [results, setResults] = useState(null);
 
+    const handleEditorWillMount = (monaco) => {
+        monaco.editor.defineTheme('vs-tactical', {
+            base: 'vs-dark',
+            inherit: true,
+            rules: [
+                { token: 'comment', foreground: '6a9955' },
+                { token: 'keyword', foreground: '569cd6' },
+                { token: 'string', foreground: 'ce9178' },
+                { token: 'number', foreground: 'b5cea8' },
+                { token: 'function', foreground: 'dcdcaa' },
+                { token: 'type', foreground: '4ec9b0' },
+                { token: 'variable', foreground: '9cdcfe' },
+            ],
+            colors: {
+                'editor.background': '#1e1e1e',
+                'editor.foreground': '#f0f6fc',
+                'editor.lineHighlightBackground': '#2a2d2e',
+                'editorCursor.foreground': '#2f81f7',
+                'editorIndentGuide.background': '#404040',
+            }
+        });
+    };
+
     const currentTask = tasks.find(t => t.id === currentTaskId) || tasks[0];
     const taskProgress = (stats.taskStats && stats.taskStats[currentTask.id]) || { level: 0, passedCount: 0, failedCount: 0, hideUntil: 0 };
     const lastPassed = results?.allPassed || taskProgress.passedCount > 0;
@@ -171,10 +194,87 @@ function App() {
     const [draggedTaskId, setDraggedTaskId] = useState(null);
     const [isDragging, setIsDragging] = useState(false);
     const [dragOverZone, setDragOverZone] = useState(null); // 'trash' | 'move-end' | null
+    const [currentStack, setCurrentStack] = useState('JavaScript');
+    const [showStackMenu, setShowStackMenu] = useState(false);
+    const [expandedModules, setExpandedModules] = useState({ "Основы": true });
+
+    const STACK_MODULES = {
+        'JavaScript': ["Основы", "Объекты: основы", "Типы данных", "Продвинутая работа с функциями"],
+        'TypeScript': ["Basic Types", "Generics", "Advanced Types"],
+        'React': ["Hooks", "Components", "Context"],
+        'Layout': ["Flexbox", "Grid", "Animations"],
+        'Git': ["Basics", "Collaboration"]
+    };
+
+    const [heatmapHoverDate, setHeatmapHoverDate] = useState(new Date().toISOString().split('T')[0]);
+
+    // Time Tracking
+    // Space Rebalancing & Splitter logic
+    const [panelWidth, setPanelWidth] = useState(() => Number(localStorage.getItem('validationPanelWidth')) || 580);
+    const [isResizing, setIsResizing] = useState(false);
+
+    const startResizing = (e) => {
+        setIsResizing(true);
+        document.body.style.cursor = 'col-resize';
+    };
+
+    useEffect(() => {
+        const handleMouseMove = (e) => {
+            if (!isResizing) return;
+            const newWidth = window.innerWidth - e.clientX;
+            if (newWidth > 350 && newWidth < 1000) {
+                setPanelWidth(newWidth);
+                localStorage.setItem('validationPanelWidth', newWidth);
+            }
+        };
+
+        const handleMouseUp = () => {
+            setIsResizing(false);
+            document.body.style.cursor = 'default';
+        };
+
+        if (isResizing) {
+            window.addEventListener('mousemove', handleMouseMove);
+            window.addEventListener('mouseup', handleMouseUp);
+        }
+
+        return () => {
+            window.removeEventListener('mousemove', handleMouseMove);
+            window.removeEventListener('mouseup', handleMouseUp);
+        };
+    }, [isResizing]);
+
+    const [taskStartTime, setTaskStartTime] = useState(Date.now());
+    const [elapsedTime, setElapsedTime] = useState(0);
 
     const xpConfig = { Easy: 10, Medium: 25, Hard: 50 };
     const currentLevel = Math.floor(stats.xp / 100);
     const progressPercent = stats.xp % 100;
+
+    const taskCounts = useMemo(() => {
+        const counts = {};
+        const now = Date.now();
+        ['JavaScript', 'TypeScript', 'React', 'Layout', 'Git'].forEach(stack => {
+            const stackTasks = tasks.filter(t => t.stack === stack && t.id >= 0);
+            const active = stackTasks.filter(t => {
+                const p = stats.taskStats[t.id];
+                return !p || p.hideUntil <= now;
+            }).length;
+            const locked = stackTasks.filter(t => {
+                const p = stats.taskStats[t.id];
+                return p && p.hideUntil > now;
+            }).length;
+            counts[stack] = { active, locked };
+        });
+        return counts;
+    }, [tasks, stats.taskStats]);
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setElapsedTime(Math.floor((Date.now() - taskStartTime) / 1000));
+        }, 1000);
+        return () => clearInterval(timer);
+    }, [taskStartTime]);
 
     const checkAchievements = () => {
         // Используем функциональное обновление, чтобы всегда иметь актуальный state
@@ -206,14 +306,70 @@ function App() {
 
     const calculateHeatmap = () => {
         const days = [];
-        for (let i = 0; i < 35; i++) {
-            const d = new Date();
-            d.setDate(d.getDate() - (34 - i));
-            const iso = d.toISOString().split('T')[0];
-            const activity = stats.dailyLog[iso]?.xp || 0;
-            days.push({ date: iso, intensity: activity > 100 ? 4 : activity > 50 ? 3 : activity > 20 ? 2 : activity > 0 ? 1 : 0 });
+        const now = new Date();
+        const currentYear = now.getFullYear();
+
+        // Start from January 1st of the current year
+        const jan1 = new Date(currentYear, 0, 1);
+        const startDayOfWeek = jan1.getDay();
+        const startDate = new Date(currentYear, 0, 1 - startDayOfWeek);
+
+        // Show the full 53 weeks of the calendar year
+        const TOTAL_DAYS = 371;
+
+        for (let i = 0; i < TOTAL_DAYS; i++) {
+            const d = new Date(startDate);
+            d.setDate(startDate.getDate() + i);
+            const dateStr = d.toISOString().split('T')[0];
+            const data = stats.dailyLog[dateStr] || { solved: 0, xp: 0 };
+
+            let intensity = 0;
+            const count = data.solved || 0;
+
+            if (count >= 100) intensity = 4;
+            else if (count >= 50) intensity = 3;
+            else if (count >= 25) intensity = 2;
+            else if (count >= 1) intensity = 1;
+
+            days.push({
+                date: dateStr,
+                intensity,
+                count: count,
+                xp: data.xp,
+                dayOfWeek: d.getDay()
+            });
         }
         return days;
+    };
+
+    const totalContributions = useMemo(() => {
+        return Object.values(stats.dailyLog).reduce((acc, curr) => acc + (curr.solved || 0), 0);
+    }, [stats.dailyLog]);
+
+    const copyBriefing = () => {
+        let text = `AI SOLVER PROMPT:\n\nTASK: ${currentTask.title}\nTOPIC: ${currentTask.topic}\nDIFFICULTY: ${currentTask.difficulty}\n\nDESCRIPTION: ${currentTask.description}\n\n`;
+
+        if (currentTask.options) {
+            text += `OPTIONS:\n${currentTask.options.map((opt, i) => `${i + 1}. ${opt}`).join('\n')}\n\n`;
+        }
+
+        if (currentTask.mode === 'code') {
+            text += `INITIAL CODE:\n${code}\n\n`;
+        } else if (currentTask.mode === 'ui-layout') {
+            text += `INITIAL HTML:\n${currentTask.initialHtml}\nINITIAL CSS:\n${cssCode}\n\n`;
+        }
+
+        text += `QUESTION: Объясните, как решить эту задачу (на русском языке), предоставив логику и оптимальное решение.`;
+
+        navigator.clipboard.writeText(text);
+        setNotifs(prev => [...prev, {
+            id: 'copy-brief',
+            title: 'DATA SECTOR COPIED',
+            desc: 'Mission briefing and AI prompt uploaded to clipboard.',
+            icon: <Copy size={16} />,
+            popupId: Date.now()
+        }]);
+        playSound('success');
     };
 
     useEffect(() => {
@@ -227,6 +383,8 @@ function App() {
         setSelectedAnswers([]);
         setResults(null);
         setShowSolution(false);
+        setTaskStartTime(Date.now());
+        setElapsedTime(0);
     }, [currentTaskId]);
 
     const visibleTasks = useMemo(() => {
@@ -239,15 +397,17 @@ function App() {
         // Hide tutorial tasks when tour is off
         return ordered
             .filter(t => {
+                // Stack Filtering
+                if (t.stack !== currentStack && t.id >= 0) return false;
+
                 // Tutorial tasks (-1 to -6) are ALWAYS visible if tour is ON
                 if (t.id < 0) return showTour;
 
                 if (stats.deletedTaskIds?.includes(t.id)) return false;
                 const prog = stats.taskStats[t.id];
                 return !prog?.hideUntil || Date.now() > prog.hideUntil;
-            })
-            .slice(0, 10);
-    }, [stats, showTour]);
+            });
+    }, [stats, showTour, currentStack]);
 
     useEffect(() => {
         if (!showTour) return;
@@ -327,12 +487,22 @@ function App() {
                 handleTourNext();
             }
 
+            const totalSecondsNow = Math.floor((Date.now() - taskStartTime) / 1000);
+            const currentBestTime = prev.taskStats[currentTask.id]?.bestTime || Infinity;
+            const newBestTime = Math.min(currentBestTime, totalSecondsNow);
+
             return {
                 ...prev,
                 xp: prev.xp + points,
                 taskStats: {
                     ...prev.taskStats,
-                    [currentTask.id]: { ...taskProgress, level: newLvl, hideUntil, passedCount: (taskProgress.passedCount || 0) + 1 }
+                    [currentTask.id]: {
+                        ...taskProgress,
+                        level: newLvl,
+                        hideUntil,
+                        passedCount: (taskProgress.passedCount || 0) + 1,
+                        bestTime: newBestTime
+                    }
                 },
                 dailyLog: {
                     ...prev.dailyLog,
@@ -434,11 +604,30 @@ function App() {
             finishValidation(allPassed, testResults);
         } else {
             const worker = new Worker(new URL('./runner.worker.js', import.meta.url), { type: 'module' });
-            worker.postMessage({ code, tests: currentTask.tests, testTemplate: currentTask.testTemplate });
+
+            // SITUATIONAL TIMEOUT: prevent "Insane" levels from hanging the tactical grid
+            const timeoutId = setTimeout(() => {
+                worker.terminate();
+                setResults({ globalError: "TACTICAL TIMEOUT: Mission execution exceeded 5s limit. Optimization required for current sector." });
+                setIsRunning(false);
+            }, 5000);
+
+            worker.postMessage({
+                code,
+                tests: currentTask.tests,
+                testTemplate: currentTask.testTemplate
+            });
             worker.onmessage = (e) => {
+                clearTimeout(timeoutId);
                 const payload = e.data;
                 if (payload.type === 'RESULTS') {
-                    finishValidation(payload.allPassed, payload.testResults);
+                    finishValidation(
+                        payload.allPassed,
+                        payload.testResults,
+                        payload.runtime,
+                        payload.memory,
+                        payload.logs
+                    );
                 } else if (payload.type === 'ERROR') {
                     setResults({ globalError: payload.message });
                     setIsRunning(false);
@@ -448,8 +637,41 @@ function App() {
         }
     };
 
-    const finishValidation = (allPassed, testResults) => {
-        setResults({ allPassed, testResults });
+    const handleQuickRun = () => {
+        playSound('run');
+        const worker = new Worker(new URL('./runner.worker.js', import.meta.url), { type: 'module' });
+        worker.postMessage({ mode: 'QUICK_RUN', code, tests: [], testTemplate: '' });
+        worker.onmessage = (e) => {
+            const payload = e.data;
+            if (payload.type === 'QUICK_RESULTS') {
+                setResults({
+                    globalError: payload.message,
+                    logs: payload.logs,
+                    allPassed: false,
+                    testResults: []
+                });
+            } else if (payload.type === 'ERROR') {
+                setResults({ globalError: `Runtime Error: ${payload.message}` });
+            }
+            worker.terminate();
+        };
+    };
+
+    const openLayoutPreview = () => {
+        playSound('click');
+        const win = window.open("", "_blank");
+        win.document.write(`
+            <html>
+                <head><style>${cssCode}</style></head>
+                <body style="background:#0a0c10; color:white; display:flex; align-items:center; justify-content:center; height:100vh;">
+                    ${currentTask.initialHtml}
+                </body>
+            </html>
+        `);
+    };
+
+    const finishValidation = (allPassed, testResults, runtime, memory, logs) => {
+        setResults({ allPassed, testResults, runtime, memory, logs });
         setIsRunning(false);
         // Log success/fail count but DON'T award XP yet
         setStats(prev => ({
@@ -465,9 +687,14 @@ function App() {
         }));
     };
 
-    const handleDragStart = (id) => {
+    const handleDragStart = (e, id) => {
         setDraggedTaskId(id);
-        setIsDragging(true);
+        if (e.dataTransfer) {
+            e.dataTransfer.setData('text/plain', String(id));
+            e.dataTransfer.effectAllowed = 'move';
+        }
+        // Small delay ensures the drag operation starts correctly before DOM changes
+        setTimeout(() => setIsDragging(true), 10);
     };
 
     const handleDragOver = (e) => {
@@ -510,21 +737,38 @@ function App() {
     const sortedTasks = useMemo(() => {
         let list = tasks.filter(t => t.title.toLowerCase().includes(searchTerm.toLowerCase()));
 
+        // Stack Filtering
+        list = list.filter(t => t.stack === currentStack);
+
+        // Hide tutorial tasks from intelligence when tour is complete
+        if (!showTour) {
+            list = list.filter(t => t.id >= 0);
+        }
+
         return list.sort((a, b) => {
-            const stA = stats.taskStats[a.id] || { level: 0 };
-            const stB = stats.taskStats[b.id] || { level: 0 };
+            const stA = stats.taskStats[a.id] || { level: 0, hideUntil: 0 };
+            const stB = stats.taskStats[b.id] || { level: 0, hideUntil: 0 };
 
             let valA = a[sortConfig.key] ?? stA[sortConfig.key];
             let valB = b[sortConfig.key] ?? stB[sortConfig.key];
 
             if (sortConfig.key === 'level') { valA = stA.level; valB = stB.level; }
             if (sortConfig.key === 'success') { valA = stA.passedCount; valB = stB.passedCount; }
+            if (sortConfig.key === 'status') {
+                const getStatus = (id, p) => {
+                    if (stats.deletedTaskIds?.includes(id)) return 2;
+                    if (p.hideUntil > Date.now()) return 1;
+                    return 0;
+                };
+                valA = getStatus(a.id, stA);
+                valB = getStatus(b.id, stB);
+            }
 
             if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
             if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
             return 0;
         });
-    }, [tasks, stats, searchTerm, sortConfig]);
+    }, [tasks, stats, searchTerm, sortConfig, currentStack]);
 
     const requestSort = (key) => {
         let direction = 'asc';
@@ -556,21 +800,75 @@ function App() {
                 isResultsOk={results?.allPassed}
             />}
 
-            {/* Dynamic Header XP Bar */}
+            {/* Dynamic Header Redesign (Shield Style) */}
             <div className="xp-sticky-header">
-                <div className="lvl-shield">Lvl {currentLevel}</div>
-                <div className="xp-track">
-                    <div className="xp-progress" style={{ width: `${progressPercent}%` }}>
-                        <div className="xp-glow-line"></div>
+                <div className="mission-status-deck">
+                    <div className="ms-group active">
+                        <Play size={12} fill="currentColor" />
+                        <div className="ms-val">
+                            <strong>{taskCounts[currentStack]?.active || 0}</strong>
+                            <span>ACTIVE</span>
+                        </div>
+                    </div>
+                    <div className="ms-group locked">
+                        <Lock size={12} />
+                        <div className="ms-val">
+                            <strong>{taskCounts[currentStack]?.locked || 0}</strong>
+                            <span>LOCKED</span>
+                        </div>
                     </div>
                 </div>
-                <div className="xp-counter"><strong>{stats.xp}</strong> Total Mastery Points</div>
+
+                <div className="xp-counter left-align">
+                    <Clock size={16} />
+                    <div className="timer-stack">
+                        <span>Mission Clock: <strong>{Math.floor(elapsedTime / 60)}:{String(elapsedTime % 60).padStart(2, '0')}</strong></span>
+                        {stats.taskStats[currentTask.id]?.bestTime && (
+                            <span className="record-txt">Personal Best: {Math.floor(stats.taskStats[currentTask.id].bestTime / 60)}:{String(stats.taskStats[currentTask.id].bestTime % 60).padStart(2, '0')}</span>
+                        )}
+                    </div>
+                </div>
+
+                <div className="lvl-card">
+                    <div className="lvl-shield-wrap">
+                        <Shield size={34} />
+                        <span>{currentLevel}</span>
+                    </div>
+                    <div className="xp-info-mini">
+                        <div className="xp-text-row">
+                            <span className="xp-count-val">{stats.xp} XP</span>
+                            <span className="lvl-label-val">LVL {currentLevel}</span>
+                        </div>
+                        <div className="xp-track">
+                            <div className="xp-progress" style={{ width: `${progressPercent}%` }}></div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div className="layout-content">
                 <aside className={`sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
                     <div className="sidebar-header">
-                        {sidebarOpen && <div className="logo"><Code2 strokeWidth={3} /><span>JS Mastery</span></div>}
+                        {sidebarOpen && (
+                            <div className="logo-wrap" onClick={() => setShowStackMenu(!showStackMenu)}>
+                                <div className="logo"><Code2 strokeWidth={3} /><span>{currentStack}</span> <Zap size={14} className="logo-spark" /></div>
+                                {showStackMenu && (
+                                    <div className="stack-selector-menu">
+                                        {[
+                                            { id: 'JavaScript', icon: <FileJson size={16} />, label: 'JavaScript' },
+                                            { id: 'TypeScript', icon: <Shield size={16} />, label: 'TypeScript' },
+                                            { id: 'React', icon: <Layers size={16} />, label: 'React.js' },
+                                            { id: 'Layout', icon: <BookOpen size={16} />, label: 'Layout & CSS' },
+                                            { id: 'Git', icon: <Zap size={16} />, label: 'Git & DevOps' }
+                                        ].map(s => (
+                                            <div key={s.id} className={`stack-opt ${currentStack === s.id ? 'active' : ''}`} onClick={() => { setCurrentStack(s.id); setShowStackMenu(false); playSound('click'); }}>
+                                                {s.icon} <span>{s.label}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )}
                         <button className="collapse-btn" onClick={() => { playSound('click'); setSidebarOpen(!sidebarOpen); }}>
                             {sidebarOpen ? <ChevronLeft /> : <ChevronRight />}
                         </button>
@@ -582,47 +880,89 @@ function App() {
                     </div>
 
                     <div className="task-sidebar-list">
-                        {activeTab === 'editor' && visibleTasks.map(task => {
-                            const taskLvl = stats.taskStats[task.id]?.level || 0;
+                        {activeTab === 'editor' && (STACK_MODULES[currentStack] || ["Default"]).map(moduleName => {
+                            // First, get all potential tasks for this module (including those on timeout, respecting search/stack)
+                            const currentModuleTasks = tasks.filter(t => {
+                                if (stats.deletedTaskIds?.includes(t.id)) return false;
+                                // Tutorial tasks are HIDDEN if tour is complete
+                                if (t.id < 0 && !showTour) return false;
+
+                                if (t.id >= 0 && t.stack !== currentStack) return false;
+                                if (searchTerm && !t.title.toLowerCase().includes(searchTerm.toLowerCase())) return false;
+
+                                // Explicit module match OR generic fallback for JavaScript (but NO tutorials in Basics)
+                                if (t.module === moduleName) return true;
+                                return !t.module && moduleName === "Основы" && t.stack === "JavaScript" && t.id >= 0;
+                            });
+
+                            const now = Date.now();
+                            const activeModuleTasks = currentModuleTasks.filter(t => {
+                                const p = stats.taskStats[t.id];
+                                return !p || p.hideUntil <= now;
+                            });
+
+                            const lockedCount = currentModuleTasks.filter(t => {
+                                const p = stats.taskStats[t.id];
+                                return p && p.hideUntil > now;
+                            }).length;
+
+                            const isExpanded = expandedModules[moduleName];
+
                             return (
-                                <button
-                                    key={task.id}
-                                    className={`sidebar-task-btn ${currentTaskId === task.id ? 'active' : ''}`}
-                                    onClick={() => { playSound('click'); setCurrentTaskId(task.id); }}
-                                    draggable="true"
-                                    onDragStart={() => handleDragStart(task.id)}
-                                    onDragEnd={() => { setIsDragging(false); setDragOverZone(null); }}
-                                >
-                                    <span className="sidebar-task-title">{task.title}</span>
-                                    <div className="sidebar-task-meta">
-                                        <span className={`f-badge ${task.difficulty.toLowerCase()}`}>{task.difficulty}</span>
-                                        <span className="f-lvl">Lvl {taskLvl}</span>
-                                    </div>
-                                </button>
+                                <div key={moduleName} className="module-group">
+                                    <button
+                                        className={`module-header ${isExpanded ? 'expanded' : ''}`}
+                                        onClick={() => {
+                                            playSound('click');
+                                            setExpandedModules(prev => ({ ...prev, [moduleName]: !prev[moduleName] }));
+                                        }}
+                                    >
+                                        <div className="module-title-wrap">
+                                            <ChevronRight size={16} className="module-chevron" />
+                                            <h4>{moduleName}</h4>
+                                        </div>
+                                        <div className="module-stats">
+                                            <div className="mod-stat">
+                                                <span className="mod-stat-label">ACTIVE</span>
+                                                <span className="mod-stat-val active">{activeModuleTasks.length}</span>
+                                            </div>
+                                            <div className="mod-stat">
+                                                <span className="mod-stat-label">LOCKED</span>
+                                                <span className="mod-stat-val locked">{lockedCount}</span>
+                                            </div>
+                                        </div>
+                                    </button>
+
+                                    {isExpanded && (
+                                        <div className="module-tasks-container">
+                                            {activeModuleTasks.length > 0 ? activeModuleTasks.map(task => {
+                                                const taskLvl = stats.taskStats[task.id]?.level || 0;
+                                                return (
+                                                    <button
+                                                        key={task.id}
+                                                        className={`sidebar-task-btn ${currentTaskId === task.id ? 'active' : ''}`}
+                                                        onClick={() => { playSound('click'); setCurrentTaskId(task.id); }}
+                                                        draggable="true"
+                                                        onDragStart={(e) => handleDragStart(e, task.id)}
+                                                    >
+                                                        <span className="sidebar-task-title">{task.title}</span>
+                                                        <div className="sidebar-task-meta">
+                                                            <span className={`f-badge ${task.difficulty.toLowerCase()}`}>{task.difficulty}</span>
+                                                            <span className="f-lvl">Lvl {taskLvl}</span>
+                                                        </div>
+                                                    </button>
+                                                );
+                                            }) : (
+                                                <div className="empty-module-msg">No active missions in this sector.</div>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
                             );
                         })}
                     </div>
 
-                    {isDragging && (
-                        <div className="drag-zones">
-                            <div
-                                className={`drag-zone trash ${dragOverZone === 'trash' ? 'hovered' : ''}`}
-                                onDragOver={(e) => { handleDragOver(e); setDragOverZone('trash'); }}
-                                onDragLeave={() => setDragOverZone(null)}
-                                onDrop={handleDropOnTrash}
-                            >
-                                <XCircle size={20} /> Trash Bin
-                            </div>
-                            <div
-                                className={`drag-zone move-end ${dragOverZone === 'move-end' ? 'hovered' : ''}`}
-                                onDragOver={(e) => { handleDragOver(e); setDragOverZone('move-end'); }}
-                                onDragLeave={() => setDragOverZone(null)}
-                                onDrop={handleDropOnEnd}
-                            >
-                                <ArrowDownCircle size={20} /> Move to End
-                            </div>
-                        </div>
-                    )}
+
                 </aside>
 
                 <main className="main-workspace">
@@ -630,18 +970,27 @@ function App() {
                         <div className="editor-workspace">
                             <header className="problem-header">
                                 <div className="problem-info">
-                                    <div className="problem-headers"><span className="p-tag">{currentTask.topic}</span><span className="p-tag stack">{currentTask.stack}</span></div>
+                                    <div className="topic-badge">{currentTask.topic} / {currentTask.stack}</div>
                                     <h1>{currentTask.title}</h1>
-                                    <p className="desc-text">{currentTask.description}</p>
+                                    <div className="briefing-card clickable-copy" onClick={copyBriefing} title="Click to copy AI Prompt">
+                                        <div className="briefing-title"><Info size={14} /> TACTICAL BRIEFING <Copy size={14} className="copy-icon-briefing" /></div>
+                                        <p className="desc-text">{currentTask.description}</p>
+                                    </div>
                                 </div>
                                 <div className="problem-actions">
-                                    <button className="action-btn solution" onClick={() => { playSound('click'); setShowSolution(!showSolution); }}><Eye size={18} /> Solution</button>
-                                    <button className="action-btn down" onClick={handleLvlDown}><ArrowDownCircle size={18} /> LVL DOWN</button>
-                                    {currentTask.mode === 'code' && (
-                                        <button className="action-btn" onClick={formatCode} title="Format Code"><Wand2 size={18} /></button>
+                                    {currentTask.mode === 'ui-layout' && (
+                                        <button className="action-btn" onClick={openLayoutPreview} title="Open Live Preview"><ExternalLink size={18} /> <span>PREVIEW</span></button>
                                     )}
-                                    <button className="action-btn run" onClick={validateCode} disabled={isRunning}>{isRunning ? 'Checking' : <Play size={18} />}</button>
-                                    <button className="action-btn up highlight" onClick={handleLvlUp} disabled={!results?.allPassed && !lastPassed}><ArrowUpCircle size={18} /> LVL UP</button>
+                                    {currentTask.mode === 'code' && (
+                                        <button className="action-btn" onClick={handleQuickRun} title="Quick Run"><PlayCircle size={18} /> <span>QUICK TEST</span></button>
+                                    )}
+                                    <button className="action-btn solution" onClick={() => { playSound('click'); setShowSolution(!showSolution); }} title="Show Solution"><Eye size={18} /> <span>SOLUTION</span></button>
+                                    <button className="action-btn down" onClick={handleLvlDown} title="Level Down"><ArrowDownCircle size={18} /> <span>LVL DOWN</span></button>
+                                    {currentTask.mode === 'code' && (
+                                        <button className="action-btn" onClick={formatCode} title="Format Code"><Wand2 size={18} /> <span>FORMAT</span></button>
+                                    )}
+                                    <button className="action-btn run" onClick={validateCode} disabled={isRunning}><Play size={18} /> <span>RUN</span></button>
+                                    <button className="action-btn up highlight" onClick={handleLvlUp} disabled={!results?.allPassed && !lastPassed}><ArrowUpCircle size={18} /> <span>LVL UP</span></button>
                                 </div>
                             </header>
 
@@ -655,7 +1004,15 @@ function App() {
                                             </div>
                                             <div className="editor-box style-box">
                                                 <div className="box-label">CSS Stylesheet</div>
-                                                <Editor height="100%" defaultLanguage="css" theme="vs-dark" value={cssCode} onChange={setCssCode} options={{ minimap: { enabled: false } }} />
+                                                <Editor
+                                                    height="100%"
+                                                    language="css"
+                                                    theme="vs-tactical"
+                                                    value={cssCode}
+                                                    onChange={setCssCode}
+                                                    beforeMount={handleEditorWillMount}
+                                                    options={{ minimap: { enabled: false }, fontSize: 14 }}
+                                                />
                                             </div>
                                         </div>
                                     ) : currentTask.mode === 'output-predictor' ? (
@@ -712,43 +1069,123 @@ function App() {
                                             </div>
                                         </div>
                                     ) : (
-                                        <Editor height="100%" defaultLanguage="javascript" theme="vs-dark" value={code} onChange={setCode} options={{ fontSize: 15, minimap: { enabled: false } }} />
+                                        <Editor
+                                            height="100%"
+                                            language={currentTask.stack === 'TypeScript' ? 'typescript' : 'javascript'}
+                                            theme="vs-tactical"
+                                            value={code}
+                                            onChange={setCode}
+                                            beforeMount={handleEditorWillMount}
+                                            options={{ fontSize: 16, minimap: { enabled: false }, scrollBeyondLastLine: false, wordWrap: 'on', fontFamily: "'JetBrains Mono', monospace" }}
+                                        />
                                     )}
 
                                     {showSolution && (
                                         <div className="solution-modal-overlay">
                                             <div className="solution-modal">
-                                                <h3><Lock size={18} /> Solution Explorer</h3>
+                                                <div className="modal-header">
+                                                    <h3><Lock size={18} /> Solution Explorer</h3>
+                                                    <div className="modal-actions">
+                                                        <button className="copy-btn" onClick={() => { navigator.clipboard.writeText(currentTask.solution); playSound('click'); setShowSolution(false); }}>
+                                                            <Copy size={16} /> Copy & Exit
+                                                        </button>
+                                                        <button className="close-x" onClick={() => setShowSolution(false)}><X size={18} /></button>
+                                                    </div>
+                                                </div>
                                                 <pre className="sol-code">{currentTask.solution}</pre>
-                                                <button className="sol-close" onClick={() => { playSound('click'); setShowSolution(false); }}>Return to Task</button>
+                                                <button className="sol-close" onClick={() => { playSound('click'); setShowSolution(false); }}>Return to Tactical Mission</button>
                                             </div>
                                         </div>
                                     )}
                                 </div>
 
-                                <div className="validation-panel">
-                                    <div className="panel-title"><Layers size={16} /> System Response</div>
-                                    <div className="panel-body">
-                                        {results ? (
-                                            <div className={`status-summary ${results.allPassed ? 'ok' : 'err'}`}>
-                                                {results.allPassed ? <Trophy className="pop" /> : <XCircle />}
-                                                <div>
-                                                    <strong>{results.allPassed ? 'Validation Passed' : 'Validation Failed'}</strong>
-                                                    <p>{results.allPassed ? 'Click LVL UP to collect XP' : 'Mismatch detected in output/logic'}</p>
-                                                </div>
-                                            </div>
-                                        ) : <div className="panel-idle"><BookOpen size={64} /><p>Run script to analyze results</p></div>}
+                                <div className={`workspace-resizer ${isResizing ? 'active' : ''}`} onMouseDown={startResizing}></div>
 
-                                        {results?.testResults?.map((t, idx) => (
-                                            <div key={idx} className={`test-entry ${t.passed ? 'yes' : 'no'}`}>
-                                                <div className="test-v-line"></div>
-                                                <div className="test-content">
-                                                    <span>Test Case #{idx + 1}</span>
-                                                    <code>Output: {JSON.stringify(t.actual)}</code>
+                                <div className="validation-panel-column" style={{ width: panelWidth }}>
+                                    <div className="validation-panel">
+                                        <div className="panel-title">
+                                            <div className="title-left"><Layers size={16} /> SYSTEM RESPONSE</div>
+                                            <Terminal size={14} className="title-icon-right" />
+                                        </div>
+                                        <div className="panel-body">
+                                            {results ? (
+                                                <>
+                                                    <div className="metrics-row">
+                                                        <div className="metric-card runtime">
+                                                            <div className="m-label">RUNTIME</div>
+                                                            <div className="m-val">{results.runtime || '0.00'}ms</div>
+                                                        </div>
+                                                        <div className="metric-card memory">
+                                                            <div className="m-label">MEMORY</div>
+                                                            <div className="m-val">{results.memory || '4.1'}MB</div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="test-results-list">
+                                                        {results.testResults?.map((t, idx) => {
+                                                            const originalParams = currentTask.tests ? currentTask.tests[idx]?.params : null;
+                                                            return (
+                                                                <div key={idx} className="test-case-row">
+                                                                    <div className="tc-header">
+                                                                        {t.passed ? <CheckCircle size={18} className="tc-ok" /> : <XCircle size={18} className="tc-bad" />}
+                                                                        <span className="tc-title">Test Case {String(idx + 1).padStart(2, '0')} {t.passed ? 'Passed' : 'Failed'}</span>
+                                                                    </div>
+                                                                    <div className="tc-details">
+                                                                        Input: <code>{JSON.stringify(originalParams)}</code> {" -> "}
+                                                                        Output: <code>{JSON.stringify(t.actual)}</code>
+                                                                    </div>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+
+                                                    <div className="logs-section">
+                                                        <div className="logs-header">LOGS</div>
+                                                        <div className="logs-block">
+                                                            {results.logs?.map((l, i) => (
+                                                                <div key={i} className="log-line"><span>&gt;</span> {l}</div>
+                                                            ))}
+                                                            {results.allPassed && <div className="log-line success"><span>&gt;</span> {currentTask.title} logic verified.</div>}
+                                                            {results.allPassed && <div className="log-line success"><span>&gt;</span> Complexity: O(n) Time | O(1) Space</div>}
+                                                        </div>
+                                                    </div>
+                                                </>
+                                            ) : (
+                                                <div className="panel-idle-modern">
+                                                    <div className="idle-icon-wrap">
+                                                        <BookOpen size={48} className="idle-book" />
+                                                        <div className="idle-glow"></div>
+                                                        <div className="idle-dot"></div>
+                                                    </div>
+                                                    <h2>Analyze mission results</h2>
+                                                    <p>Run tests to verify your solution and see performance metrics.</p>
+
+                                                    <div className="idle-meta-list">
+                                                        <div className="meta-item">
+                                                            <div className="meta-icon"><Zap size={16} /></div>
+                                                            <div className="meta-text">
+                                                                <strong>METRIC: RUNTIME</strong>
+                                                                <span>High-precision latency tracking</span>
+                                                            </div>
+                                                        </div>
+                                                        <div className="meta-item">
+                                                            <div className="meta-icon"><Shield size={16} /></div>
+                                                            <div className="meta-text">
+                                                                <strong>RESOURCE: MEMORY</strong>
+                                                                <span>Estimated allocation profiling</span>
+                                                            </div>
+                                                        </div>
+                                                        <div className="meta-item">
+                                                            <div className="meta-icon"><Terminal size={16} /></div>
+                                                            <div className="meta-text">
+                                                                <strong>VALIDATION: LOGS</strong>
+                                                                <span>Neural console interception</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        ))}
-                                        {results?.globalError && <div className="runtime-err">{results.globalError}</div>}
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -776,11 +1213,12 @@ function App() {
                                         <table className="f-table">
                                             <thead>
                                                 <tr>
-                                                    <th onClick={() => requestSort('title')}>Product {sortConfig.key === 'title' && (sortConfig.direction === 'asc' ? '▲' : '▼')}</th>
+                                                    <th onClick={() => requestSort('title')}>Assignment {sortConfig.key === 'title' && (sortConfig.direction === 'asc' ? '▲' : '▼')}</th>
                                                     <th onClick={() => requestSort('topic')}>Module</th>
+                                                    <th>Record</th>
                                                     <th onClick={() => requestSort('level')}>Level</th>
                                                     <th onClick={() => requestSort('success')}>Score</th>
-                                                    <th>Status</th>
+                                                    <th onClick={() => requestSort('status')}>Status {sortConfig.key === 'status' && (sortConfig.direction === 'asc' ? '▲' : '▼')}</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -791,9 +1229,18 @@ function App() {
                                                         <tr key={t.id}>
                                                             <td><div className="t-name"><strong>{t.title}</strong><span className={t.difficulty.toLowerCase()}>{t.difficulty}</span></div></td>
                                                             <td><span className="m-tag">{t.topic}</span></td>
+                                                            <td><div className="record-txt-db">{p.bestTime ? `${Math.floor(p.bestTime / 60)}:${String(p.bestTime % 60).padStart(2, '0')}` : '—'}</div></td>
                                                             <td><div className="l-pill">Lvl {p.level}</div></td>
                                                             <td><div className="score-wrap"><span className="g">{p.passedCount}</span>/<span className="r">{p.failedCount}</span></div></td>
-                                                            <td>{hidden ? <span className="s-tag hidden">Locked ({Math.round((p.hideUntil - Date.now()) / 3600000)}h)</span> : <span className="s-tag ready">Active</span>}</td>
+                                                            <td>
+                                                                {stats.deletedTaskIds?.includes(t.id) ? (
+                                                                    <span className="s-tag delete">DELETED</span>
+                                                                ) : hidden ? (
+                                                                    <span className="s-tag hidden">Locked ({Math.round((p.hideUntil - Date.now()) / 3600000)}h)</span>
+                                                                ) : (
+                                                                    <span className="s-tag ready">Active</span>
+                                                                )}
+                                                            </td>
                                                         </tr>
                                                     );
                                                 })}
@@ -803,33 +1250,82 @@ function App() {
                                 </div>
                             ) : (
                                 <div className="journal-stats">
-                                    <div className="stats-header">
-                                        <div className="heatmap-section">
-                                            <h3><Calendar size={18} /> Activity Intensity</h3>
-                                            <div className="heatmap-grid">
-                                                {calculateHeatmap().map((day, i) => (
-                                                    <div key={i} className={`heat-cell level-${day.intensity}`} title={`${day.date}: ${day.intensity} intensity`}></div>
-                                                ))}
+                                    <div className="github-heatmap-container">
+                                        <div className="gh-heatmap-main">
+                                            {(() => {
+                                                const hoverData = stats.dailyLog[heatmapHoverDate] || { xp: 0, solved: 0, breakdown: { Easy: 0, Medium: 0, Hard: 0 } };
+                                                const dObj = new Date(heatmapHoverDate);
+                                                const dateTitle = dObj.toDateString();
+
+                                                return (
+                                                    <div className="gh-header custom-stats-header">
+                                                        <div className="gh-header-left">
+                                                            <div className="gh-date-title">{dateTitle}</div>
+                                                            <div className="gh-total-solved">Solved: <strong>{hoverData.solved} total</strong></div>
+                                                        </div>
+                                                        <div className="gh-header-center">
+                                                            <div className="gh-xp-gain">+{hoverData.xp} <span>XP Gained</span></div>
+                                                        </div>
+                                                        <div className="gh-header-right">
+                                                            <div className="gh-breakdown">
+                                                                <div className="br-item easy">Easy <strong>{hoverData.breakdown?.Easy || 0}</strong></div>
+                                                                <div className="br-item medium">Medium <strong>{hoverData.breakdown?.Medium || 0}</strong></div>
+                                                                <div className="br-item hard">Hard <strong>{hoverData.breakdown?.Hard || 0}</strong></div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })()}
+
+                                            <div className="gh-grid-wrapper">
+                                                <div className="gh-grid-content">
+                                                    <div className="heatmap-grid github-style fluid-grid">
+                                                        {calculateHeatmap().map((day, i) => (
+                                                            <div
+                                                                key={i}
+                                                                className={`heat-cell level-${day.intensity} ${heatmapHoverDate === day.date ? 'hover-active' : ''}`}
+                                                                onMouseEnter={() => setHeatmapHoverDate(day.date)}
+                                                            ></div>
+                                                        ))}
+                                                    </div>
+                                                    <div className="gh-footer">
+                                                        <div className="gh-legend">
+                                                            <span>Less</span>
+                                                            <div className="heat-cell level-0"></div>
+                                                            <div className="heat-cell level-1"></div>
+                                                            <div className="heat-cell level-2"></div>
+                                                            <div className="heat-cell level-3"></div>
+                                                            <div className="heat-cell level-4"></div>
+                                                            <span>More</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
 
-                                        <div className="achievement-section">
-                                            <h3><Award size={18} /> Mastery Milestones ({stats.unlockedAchievements.length} / {achievements.length})</h3>
-                                            <div className="achievement-grid-scroll">
-                                                {achievements.map(ach => {
-                                                    const unlocked = stats.unlockedAchievements.includes(ach.id);
-                                                    return (
-                                                        <div key={ach.id} className={`ach-card ${unlocked ? 'unlocked' : 'locked'}`}>
-                                                            <div className="ach-icon">{unlocked ? <Sparkles className="sparkle-anim" /> : ach.icon}</div>
-                                                            <div className="ach-info">
-                                                                <strong>{ach.title}</strong>
-                                                                <p>{ach.desc}</p>
-                                                                {unlocked && <span className="ach-reward">+{ach.reward} XP Awarded</span>}
-                                                            </div>
+                                        <div className="gh-year-selector">
+                                            {[2026, 2025, 2024, 2023, 2022].map(year => (
+                                                <button key={year} className={year === 2026 ? 'active' : ''}>{year}</button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div className="achievement-section">
+                                        <h3><Award size={18} /> Mastery Milestones ({stats.unlockedAchievements.length} / {achievements.length})</h3>
+                                        <div className="achievement-grid-scroll">
+                                            {achievements.map(ach => {
+                                                const unlocked = stats.unlockedAchievements.includes(ach.id);
+                                                return (
+                                                    <div key={ach.id} className={`ach-card ${unlocked ? 'unlocked' : 'locked'}`}>
+                                                        <div className="ach-icon">{unlocked ? <Sparkles className="sparkle-anim" /> : ach.icon}</div>
+                                                        <div className="ach-info">
+                                                            <strong>{ach.title}</strong>
+                                                            <p>{ach.desc}</p>
+                                                            {unlocked && <span className="ach-reward">+{ach.reward} XP Awarded</span>}
                                                         </div>
-                                                    );
-                                                })}
-                                            </div>
+                                                    </div>
+                                                );
+                                            })}
                                         </div>
                                     </div>
 
@@ -857,6 +1353,37 @@ function App() {
                     )}
                 </main>
             </div>
+
+            {isDragging && (
+                <div className="drag-modal-overlay">
+                    <div className="drag-modal">
+                        <div className="modal-top">TACTICAL MISSION REASSIGNMENT</div>
+                        <div className="drag-zones-horizontal">
+                            <div
+                                className={`drag-zone-big trash ${dragOverZone === 'trash' ? 'hovered' : ''}`}
+                                onDragOver={(e) => { handleDragOver(e); setDragOverZone('trash'); }}
+                                onDragLeave={() => setDragOverZone(null)}
+                                onDrop={handleDropOnTrash}
+                            >
+                                <XCircle size={42} />
+                                <span>TRASH BIN</span>
+                                <small>Delete mission record</small>
+                            </div>
+                            <div
+                                className={`drag-zone-big move-end ${dragOverZone === 'move-end' ? 'hovered' : ''}`}
+                                onDragOver={(e) => { handleDragOver(e); setDragOverZone('move-end'); }}
+                                onDragLeave={() => setDragOverZone(null)}
+                                onDrop={handleDropOnEnd}
+                            >
+                                <ArrowDownCircle size={42} />
+                                <span>MOVE TO END</span>
+                                <small>Reprioritize mission</small>
+                            </div>
+                        </div>
+                        <div className="modal-bottom">Release to confirm operational change</div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
