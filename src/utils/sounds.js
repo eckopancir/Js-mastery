@@ -21,7 +21,9 @@ export const playSound = (soundKey) => {
     if (!url) return;
 
     if (!audioCache[soundKey]) {
-        audioCache[soundKey] = new Audio(url);
+        const audio = new Audio(url);
+        audio.volume = 0.1;
+        audioCache[soundKey] = audio;
     }
 
     const audio = audioCache[soundKey];
