@@ -1,0 +1,26 @@
+node_modules
+.antigravity/
+dist/
+
+# Archives
+*.rar
+*.zip
+*.7z
+*.tar.gz
+*.tar
+*.gz
+
+# Logs & temp
+Error.log
+toDo.txt
+AGENTS.md
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# OS
+Thumbs.db
+.DS_Store
+Desktop.ini

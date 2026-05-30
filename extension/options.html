@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Настройки расширения</title>
+  <style>
+    body { font-family: sans-serif; max-width: 800px; margin: 20px auto; padding: 0 20px; }
+    h1, h2 { border-bottom: 1px solid #ccc; padding-bottom: 10px; }
+    .section { margin-bottom: 30px; }
+    .site-item { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; border: 1px solid #eee; padding: 10px; border-radius: 4px; flex-wrap: wrap; }
+    .site-item input { padding: 5px; flex: 1; min-width: 120px; }
+    .site-item label { display: flex; align-items: center; gap: 5px; white-space: nowrap; }
+    .site-item .path-filter { flex: 0 0 150px; }
+    .site-item .cost-input { flex: 0 0 80px; }
+    .shorts-hint { font-size: 10px; color: #666; width: 100%; margin-top: 5px; }
+    button { padding: 8px 15px; cursor: pointer; border: none; border-radius: 3px; }
+    .btn-add { background: #2196F3; color: white; }
+    .btn-remove { background: #f44336; color: white; }
+    .btn-save { background: #4CAF50; color: white; font-size: 16px; padding: 10px 20px; }
+    .global-settings { display: flex; gap: 20px; align-items: center; }
+    #statusMsg { color: green; font-weight: bold; }
+    .shorts-hint { font-size: 10px; color: #666; width: 100%; margin-top: 5px; }
+  </style>
+</head>
+<body>
+  <h1>Настройки "Вредных" сайтов</h1>
+
+  <div class="section">
+    <h2>Текущий баланс</h2>
+    <div class="global-settings">
+      <span><strong id="currentPoints">0</strong> баллов</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Список отслеживаемых сайтов</h2>
+    <div id="sitesList"></div>
+    <button id="addSiteBtn" class="btn-add">+ Добавить сайт</button>
+  </div>
+
+  <div class="section">
+    <button id="saveBtn" class="btn-save">Сохранить настройки</button>
+    <span id="statusMsg"></span>
+  </div>
+
+  <script src="options.js?v=4.2"></script>
+</body>
+</html>

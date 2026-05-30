@@ -1,0 +1,1887 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Oxford 5000 | Cyber Learning</title>
+  <link rel="stylesheet" href="stylewords.css?v=171232333">
+  <link rel="icon" type="image/png" href="favicon.png" />
+</head>
+
+<body>
+  <div class="stats-top-bar">
+    <div class="cyber-logo" onclick="location.reload()">
+      <span class="part1">Cyber</span>
+      <span class="part2">English</span>
+    </div>
+    <div class="stat-banner"><span class="label">A1:</span> <span id="stat-a1">0</span></div>
+    <div class="stat-banner"><span class="label">A2:</span> <span id="stat-a2">0</span></div>
+    <div class="stat-banner"><span class="label">B1:</span> <span id="stat-b1">0</span></div>
+    <div class="stat-banner"><span class="label">B2:</span> <span id="stat-b2">0</span></div>
+    <div class="stat-banner"><span class="label">C1:</span> <span id="stat-c1">0</span></div>
+
+    <div class="divider">|</div>
+
+    <div class="stat-banner highlighting" title="Доступно новых слов для изучения">
+      <span class="label">AVAIL LEARN:</span> <span id="stat-avail-learn">0</span>
+    </div>
+    <div class="stat-banner highlighting" title="Повторение: Английский -> Русский">
+      <span class="label">REV EN-RU:</span> <span id="stat-avail-eng">0</span>
+    </div>
+    <div class="stat-banner highlighting" title="Повторение: Русский -> Английский">
+      <span class="label">REV RU-EN:</span> <span id="stat-avail-rus">0</span>
+    </div>
+
+    <div class="divider">|</div>
+
+    <div class="stat-banner highlighting">
+      <span class="label">TODAY NEW:</span> <span id="stat-today-new">0</span>
+    </div>
+    <div class="stat-banner highlighting">
+      <span class="label">REVIEWS:</span> <span id="stat-today-rev">0</span>
+    </div>
+
+    <div class="divider">|</div>
+
+    <div class="stat-banner record" title="Лучший результат новых слов за день в этом месяце">
+      <span class="label">MONTH BEST:</span> <span id="stat-month-record">0</span>
+    </div>
+    <div class="stat-banner record">
+      <span class="label">TOTAL:</span> <span id="learned-stat">0</span>
+    </div>
+    <div class="stat-banner streak" title="Ударный режим (дни без пропусков)">
+      <span class="label">STREAK:</span> <span id="stat-streak">0</span> 🔥
+    </div>
+
+    <div class="stat-banner" style="border-color: rgba(74, 158, 255, 0.4);">
+      <span class="label" style="color: #4a9eff;">XP:</span>
+      <span id="xp-display" style="color: #fff; font-weight:700;">0</span>
+    </div>
+
+    <div class="divider">|</div>
+    <div id="user-display" class="stat-banner"
+      style="cursor: pointer; border: 1px solid rgba(74, 158, 255, 0.2); background: rgba(74, 158, 255, 0.05);"
+      onclick="toggleAuthModal()">
+      <span class="label">USER:</span> <span id="current-user-name"
+        style="color: var(--text-primary, #e6edf3);">GUEST</span>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="nav-header">
+      <button class="glass-button nav-button active" onclick="switchScreen('setup-panel')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
+          <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+          <path d="M6 12v5c3 3 9 3 12 0v-5" />
+        </svg>
+        <span>Изучение</span>
+      </button>
+      <button class="glass-button nav-button" onclick="showReviewOptions()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          <path d="m9 12 2 2 4-4" />
+        </svg>
+        <span>Изученные</span>
+      </button>
+      <button class="glass-button nav-button" onclick="startMatchMode()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
+          <line x1="6" y1="11" x2="10" y2="11" />
+          <line x1="8" y1="9" x2="8" y2="13" />
+          <rect x="2" y="6" width="20" height="12" rx="2" />
+          <path d="M15 12h.01" />
+          <path d="M18 10h.01" />
+        </svg>
+        <span>Соответствие</span>
+      </button>
+      <button class="glass-button nav-button" onclick="showJournal()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
+          <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z" />
+          <path d="M8 7h6" />
+          <path d="M8 11h8" />
+        </svg>
+        <span>Журнал</span>
+      </button>
+      <button class="glass-button nav-button" onclick="showReading()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
+          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+        </svg>
+        <span>Чтение</span>
+      </button>
+      <button class="glass-button nav-button" onclick="showTheory()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
+          <circle cx="12" cy="12" r="10" />
+          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+          <line x1="12" y1="17" x2="12.01" y2="17" />
+        </svg>
+        <span>Теория</span>
+      </button>
+    </div>
+
+    <!-- READING SCREEN -->
+    <div id="reading-screen" style="display: none; text-align: center; margin-top: 20px;">
+      <h2 style="color: var(--primary-green); text-shadow: 0 0 10px var(--primary-green);">CYBER READING</h2>
+      <p style="color: #888; margin-bottom: 20px;">Генерация истории на основе ваших изученных слов</p>
+
+      <div id="reading-controls" style="margin-bottom: 20px;">
+        <button id="gen-story-btn" class="glass-button start-btn" onclick="generateStory()">ГЕНЕРИРОВАТЬ
+          РАССКАЗ</button>
+      </div>
+
+      <div id="story-display" class="story-container" style="display: none;">
+        <div id="story-text-en" class="story-content en"></div>
+        <hr style="border: 0; border-top: 1px dashed rgba(74, 158, 255, 0.2); margin: 20px 0;">
+        <div id="story-text-ru" class="story-content ru" style="opacity: 0.7; font-style: italic;"></div>
+      </div>
+
+      <div id="reading-placeholder" style="padding: 50px; opacity: 0.5;">
+        Нажмите кнопку выше, чтобы составить историю из вашего словаря...
+      </div>
+    </div>
+    <div id="theory-screen" style="display: none; text-align: center; margin-top: 20px;"></div>
+    <div id="journal-screen" style="display: none">
+      <div class="journal-tabs">
+        <button id="tab-learned" class="glass-button active" onclick="setJournalTab('learned')">Изученные</button>
+        <button id="tab-finished" class="glass-button" onclick="setJournalTab('finished')">Завершенные</button>
+      </div>
+      <div id="journal-mode-selector-box" class="journal-mode-selector" style="
+            text-align: center;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+          ">
+        <button id="j-mode-eng" class="glass-button active" onclick="setJournalMode('eng')">
+          EN ➔ RU Progress
+        </button>
+        <button id="j-mode-rus" class="glass-button" onclick="setJournalMode('rus')">
+          RU ➔ EN Progress
+        </button>
+      </div>
+      <div class="journal-controls">
+        <input type="text" id="journal-search" class="search-input" placeholder="Поиск слова или перевода..."
+          oninput="renderJournal()">
+        <div class="backup-btns-container">
+          <button class="glass-button backup-btn" onclick="downloadBackup()">💾 BACKUP JSON</button>
+          <button class="glass-button backup-btn" style="border-color:#4a9eff !important; color:#4a9eff !important;"
+            onclick="document.getElementById('import-file').click()">📂 RESTORE JSON</button>
+          <input type="file" id="import-file" style="display:none" accept=".json" onchange="restoreBackup(event)">
+        </div>
+      </div>
+      <div id="journal-container">
+        <table class="journal-table">
+          <thead>
+            <tr id="journal-header">
+              <th onclick="sortJournal('word')">🔤 Слово</th>
+              <th onclick="sortJournal('level')">📊 Уровень</th>
+              <th onclick="sortJournal('views')">👁 Просмотры</th>
+              <th onclick="sortJournal('days')">📅 Дней</th>
+              <th onclick="sortJournal('score0')">0</th>
+              <th onclick="sortJournal('score1')">1</th>
+              <th onclick="sortJournal('score2')">2</th>
+              <th onclick="sortJournal('score3')">3</th>
+              <th onclick="sortJournal('score4')">4</th>
+              <th onclick="sortJournal('diff')">📈 Прогресс</th>
+              <th onclick="sortJournal('status')">🕒 Статус</th>
+            </tr>
+          </thead>
+          <tbody id="journal-grid"></tbody>
+        </table>
+      </div>
+    </div>
+    <script>
+      // === ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ===
+      var todayDate = new Date().toISOString().split('T')[0];
+      var matchTimer = null;
+      var currentJournalTab = 'learned'; // 'learned' or 'finished'
+      var xpUpdateInterval = null; // Для очистки интервала
+
+      // Глобальные функции (вызываются из HTML onclick)
+      function updateXPDisplay() {
+        const xpDisp = document.getElementById('xp-display');
+        if (xpDisp) {
+          let mainXP = 0;
+          try {
+            const stats = JSON.parse(localStorage.getItem('js_mastery_stats_v3') || '{}');
+            mainXP = Number(stats.xp) || 0;
+          } catch (e) { }
+          const pendingXP = Number(localStorage.getItem('engwords_xp_pending') || 0);
+          xpDisp.innerText = (mainXP + pendingXP).toFixed(1);
+        }
+      }
+
+      // === ФУНКЦИИ И ПЕРЕМЕННЫЕ ВНУТРИ DOMContentLoaded ===
+      document.addEventListener('DOMContentLoaded', () => {
+        // Переменные (words.js уже объявил learnedWords, matchPool, finishedWords)
+        let currentSelection = [];
+        // currentJournalTab уже глобальная
+        // --- ФУНКЦИИ (определяем до использования) ---
+        function getTotalXP() {
+          let mainXP = 0;
+          try {
+            const stats = JSON.parse(localStorage.getItem('js_mastery_stats_v3') || '{}');
+            mainXP = Number(stats.xp) || 0;
+          } catch (e) { }
+          const pendingXP = Number(localStorage.getItem('engwords_xp_pending') || 0);
+          return mainXP + pendingXP;
+        }
+
+        window.calculateWordXP = function (level, score) {
+          if (score <= 1) return 0;
+          const scoreBase = { 4: 0.3, 3: 0.2, 2: 0.1 };
+          const base = scoreBase[score] || 0;
+          const levelMult = { 'A1': 1.0, 'A2': 1.5, 'B1': 2.0, 'B2': 3.0, 'C1': 4.0 };
+          const mult = levelMult[level] || 1.0;
+          return base * mult;
+        }
+
+        // Проверяем и сбрасываем review_stats если день сменился
+        const reviewStatsLocal = JSON.parse(localStorage.getItem('review_stats') || '{"date": "", "count": 0}');
+        if (reviewStatsLocal.date !== todayDate) {
+          localStorage.setItem('review_stats', JSON.stringify({ date: todayDate, count: 0 }));
+        }
+
+        // Инициализация при загрузке
+        updateXPDisplay();
+        // Слушаем изменения localStorage от других вкладок/приложений
+        window.addEventListener('storage', (e) => {
+          if (e.key === 'js_mastery_stats_v3' || e.key === 'engwords_xp_pending') {
+            updateXPDisplay();
+          }
+        });
+        // Периодическая проверка (на случай если событие storage не сработало)
+        xpUpdateInterval = setInterval(updateXPDisplay, 2000);
+
+        // Очистка интервала при выгрузке страницы
+        window.addEventListener('beforeunload', () => {
+          if (xpUpdateInterval) clearInterval(xpUpdateInterval);
+        });
+
+        window.showReviewOptions = function () {
+          // Показываем наше модальное окно (оно уже есть в HTML)
+          const modal = document.getElementById('review-modal');
+          if (modal) {
+            modal.style.display = 'flex';
+          } else {
+            // Фолбэк на старые confirm если модала нет
+            const mode = confirm('Выберите направление:\nOK — EN -> RU\nОтмена — RU -> EN');
+            const sortMode = confirm('Выберите порядок:\nOK — Случайно\nОтмена — По уровням');
+            startReview(mode ? 'eng-rus' : 'rus-eng', sortMode ? 'random' : 'level');
+          }
+        }
+
+        // Закрывающие скобки для DOMContentLoaded
+      });
+    </script>
+    <div class="button-row">
+      <div id="setup-panel">
+        <div class="filter-group">
+          <select id="filter-level" class="glass-select">
+            <option value="all">Все уровни (A1-C1)</option>
+            <option value="A1">Level A1</option>
+            <option value="A2">Level A2</option>
+            <option value="B1">Level B1</option>
+            <option value="B2">Level B2</option>
+            <option value="C1">Level C1</option>
+          </select>
+
+          <select id="filter-type" class="glass-select">
+            <option value="all">Все части речи</option>
+            <option value="v.">Глаголы (v.)</option>
+            <option value="n.">Существительные (n.)</option>
+            <option value="adj.">Прилагательные (adj.)</option>
+            <option value="adv.">Наречия (adv.)</option>
+          </select>
+        </div>
+
+        <button class="glass-button start-btn" onclick="generateNewList()">
+          Сформировать список (20)
+        </button>
+        <button class="glass-button shuffle-btn" onclick="shuffleCurrentList()">
+          Перемешать текущие
+        </button>
+      </div>
+      <div id="tooltip" class="custom-tooltip"></div>
+    </div>
+
+    <div id="table-container" style="display: none">
+      <table class="cyber-table">
+        <thead>
+          <tr>
+            <th style="width: 40px">№</th>
+            <th>Слово</th>
+            <th>Транскрипция</th>
+            <th>Перевод</th>
+            <th style="width: 50px">Звук</th>
+            <th style="width: 80px">Словарь</th>
+            <th style="width: 100px">Статус</th>
+          </tr>
+        </thead>
+        <tbody id="words-grid"></tbody>
+      </table>
+    </div>
+    <div id="review-container" style="display: none; text-align: center; margin-top: 50px">
+      <div class="review-card">
+        <div id="review-mode-badge" style="
+              font-size: 0.7rem;
+              color: #58a6ff;
+              letter-spacing: 2px;
+              margin-bottom: 5px;
+              text-transform: uppercase;
+              font-weight: bold;
+            "></div>
+
+        <div id="review-level-tag" class="level-badge">LVL 1</div>
+
+        <div class="review-display-wrapper" style="
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: 15px;
+              margin-top: 10px;
+            ">
+          <div id="review-word-display" class="main-word" style="font-size: 3.5rem; position: relative; cursor: help">
+            Word
+          </div>
+          <button class="audio-icon review-audio-btn" id="review-replay-audio" onclick="replayCurrentAudio()"
+            style="font-size: 2rem; display: none">
+            🔊
+          </button>
+        </div>
+        <div id="review-phonetic" style="color: #888; margin-bottom: 10px; font-family: monospace">
+          [phonetic]
+        </div>
+
+        <div id="review-translation" class="translation-cell"
+          style="display: none; font-size: 1.8rem; margin: 25px 0; color: #58a6ff">
+          Перевод
+        </div>
+
+        <div class="review-controls">
+          <button id="show-answer-btn" class="glass-button start-btn" onclick="showReviewAnswer()">
+            Показать ответ
+          </button>
+          <button id="ai-gen-btn" class="glass-button" style="border-color: #58a6ff; color: #58a6ff; margin-left: 10px;"
+            onclick="generateExampleSentence(currentReviewWord.word)">
+            Помощь (AI)
+          </button>
+
+          <div id="example-display" style="margin-top: 20px;"></div>
+
+          <div id="rating-buttons" style="display: none; gap: 12px; justify-content: center; margin-top: 25px">
+            <button onclick="rateWord(0)" style="background: #f85149" class="rate-btn">0</button>
+            <button onclick="rateWord(1)" style="background: #d29922" class="rate-btn">1</button>
+            <button onclick="rateWord(2)" style="background: #d29922" class="rate-btn">
+              2
+            </button>
+            <button onclick="rateWord(3)" style="background: #238636" class="rate-btn">
+              3
+            </button>
+            <button onclick="rateWord(4)" style="background: #0d4429" class="rate-btn">4</button>
+          </div>
+        </div>
+      </div>
+      <button id="back-to-list-btn" class="glass-button" style="margin-top: 40px" onclick="location.reload()">
+        Назад к списку
+      </button>
+    </div>
+
+    <!-- MATCH MODE SCREEN -->
+    <div id="match-screen" class="game-screen">
+      <h2 style="color: #58a6ff; margin-bottom: 10px;">MATCH MODE</h2>
+      <div id="match-pool-info" class="match-pool-counter">Слов в пуле: 0 / 5</div>
+      <div id="match-status-msg" class="match-message" style="color: #58a6ff;"></div>
+      <div id="match-timer" style="font-size: 1.5rem; color: #d29922; margin-bottom: 20px;">00:30</div>
+      <div class="match-grid">
+        <div id="match-left" class="match-column"></div>
+        <div id="match-right" class="match-column"></div>
+      </div>
+      <button id="match-exit-btn" class="glass-button" style="margin-top: 40px"
+        onclick="location.reload()">ВЫХОД</button>
+    </div>
+
+
+  </div>
+  </div>
+  </div>
+
+  <!-- GUIDE MODAL -->
+  <div id="guide-modal" class="modal-overlay" style="display: none">
+    <div class="modal-content guide-content">
+      <h2 style="color: var(--primary-green); text-align: center; text-shadow: 0 0 15px var(--primary-green);">
+        ИНСТРУКЦИЯ ПО ЭКСПЛУАТАЦИИ</h2>
+
+      <div class="guide-section">
+        <h3>1. ИЗУЧЕНИЕ (STUDY)</h3>
+        <p>Здесь вы выбираете новые слова по уровню (A1-C1) и части речи. Нажав на <span class="guide-key">✔</span>, вы
+          сохраняете слово. Оно уходит в категорию "Изученные" с начальным 1-м уровнем.</p>
+        <p>Используйте <span class="guide-key">✖</span>, чтобы навсегда убрать слово в архив "Завершенные".</p>
+      </div>
+
+      <div class="guide-section">
+        <h3>2. ПОВТОРЕНИЕ (SRS)</h3>
+        <p>Алгоритм интервальных повторений. Оценивайте свои знания кнопками 0-4:</p>
+        <ul>
+          <li><span class="guide-key">4 & 3:</span> Увеличение уровня слова в 3 или 2 раза. Слово пропадает на
+            количество часов, равное его уровню.</li>
+          <li><span class="guide-key">2:</span> Уровень не меняется, слово скрывается на 1 час.</li>
+          <li><span class="guide-key">1 & 0:</span> Слово отправляется в пул <b>MATCH MODE</b> для закрепления. Оценка 0
+            также снижает уровень вдвое.</li>
+        </ul>
+      </div>
+
+      <div class="guide-section">
+        <h3>3. MATCH MODE</h3>
+        <p>Мини-игра на время (30 сек). Сопоставьте 5 слов с их переводом. Если ошиблись или время вышло — игра
+          сбросится. После победы слова сразу возвращаются в блок "Изученные" (статус READY).</p>
+      </div>
+
+      <div class="guide-section">
+        <h3>4. ЖУРНАЛ И СТАТУСЫ</h3>
+        <p>В журнале можно смотреть свой прогресс. Колонка статус подскажет:</p>
+        <ul>
+          <li><span style="color:#3fb950">READY:</span> Доступно для повторения.</li>
+          <li><span style="color:#00f2fe">MATCH:</span> Ждет игры в Match Mode.</li>
+          <li><span style="color:#ffa500">⏳ Время:</span> Отдыхает под таймером.</li>
+        </ul>
+      </div>
+
+      <div class="modal-actions">
+        <div class="dont-show-container">
+          <input type="checkbox" id="dont-show-guide" checked>
+          <label for="dont-show-guide">Больше не показывать при входе</label>
+        </div>
+        <button class="glass-button start-btn" onclick="closeGuide()" style="width: 100%; margin-top:20px;">ПОНЯТНО,
+          ВПЕРЕД!</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="review-modal" class="modal-overlay" style="display: none">
+    <div class="modal-content">
+      <h2 style="color: #4a9eff; margin-bottom: 20px; text-shadow: 0 0 10px rgba(74, 158, 255, 0.5)">
+        ПАРАМЕТРЫ ПОВТОРЕНИЯ
+      </h2>
+
+      <div class="modal-group">
+        <label>НАПРАВЛЕНИЕ:</label>
+        <div class="modal-options">
+          <button id="mode-en-ru" class="glass-button active" onclick="selectOption('mode', 'eng-rus')">
+            EN ➔ RU
+          </button>
+          <button id="mode-ru-en" class="glass-button" onclick="selectOption('mode', 'rus-eng')">
+            RU ➔ EN
+          </button>
+        </div>
+      </div>
+
+      <div class="modal-group">
+        <label>СОРТИРОВКА:</label>
+        <div class="modal-options">
+          <button id="sort-random" class="glass-button active" onclick="selectOption('sort', 'random')">
+            СЛУЧАЙНО
+          </button>
+          <button id="sort-level" class="glass-button" onclick="selectOption('sort', 'level')">
+            СЛАБЫЕ (LVL)
+          </button>
+        </div>
+      </div>
+
+      <div class="modal-actions" style="margin-top: 30px">
+        <button class="glass-button start-btn" onclick="confirmReviewStart()" style="width: 100%">
+          ЗАПУСТИТЬ ТРЕНИРОВКУ
+        </button>
+        <button class="glass-button" onclick="closeModal()"
+          style="width: 100%; margin-top: 10px; border-color: #ff4d4d; color: #ff4d4d">
+          ОТМЕНА
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- AUTH MODAL -->
+  <div id="auth-modal" class="modal-overlay" style="display: none">
+    <div class="modal-content" style="max-width: 400px;">
+      <h2 id="auth-title" style="color: var(--primary-green); text-align: center; margin-bottom: 25px;">CYBER ACCESS
+      </h2>
+
+      <div id="auth-form-container">
+        <div class="modal-group">
+          <label>LOGIN</label>
+          <input type="text" id="auth-username" class="glass-select"
+            style="width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--primary-green); color: var(--text-primary, #e6edf3); padding: 10px; margin-top: 5px;">
+        </div>
+        <div class="modal-group" style="margin-top: 15px;">
+          <label>PASSWORD</label>
+          <input type="password" id="auth-password" class="glass-select"
+            style="width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--primary-green); color: var(--text-primary, #e6edf3); padding: 10px; margin-top: 5px;">
+        </div>
+
+        <div class="modal-actions" style="margin-top: 30px;">
+          <button id="auth-main-btn" class="glass-button start-btn" style="width: 100%;"
+            onclick="handleAuth()">ВХОД</button>
+          <p id="auth-switch-text"
+            style="color: #888; text-align: center; margin-top: 15px; cursor: pointer; font-size: 0.9rem;"
+            onclick="toggleAuthMode()">Нет аккаунта? Зарегистрироваться</p>
+          <button class="glass-button" style="width: 100%; margin-top: 10px; border-color: #ff4d4d; color: #ff4d4d"
+            onclick="toggleAuthModal()">ОТМЕНА</button>
+        </div>
+      </div>
+
+      <div id="user-profile-container" style="display: none; text-align: center;">
+        <p style="color: var(--text-primary, #e6edf3); font-size: 1.2rem; margin-bottom: 20px;">Вы вошли как <b
+            id="profile-name" style="color: var(--primary-green);"></b></p>
+        <div class="sync-status" style="margin-bottom: 20px; font-size: 0.8rem; color: #888;">
+          Статус: <span id="sync-info" style="color: var(--primary-green);">Синхронизировано</span>
+        </div>
+        <button class="glass-button" style="width: 100%; border-color: #ff4d4d; color: #ff4d4d"
+          onclick="handleLogout()">ВЫЙТИ ИЗ
+          АККАУНТА</button>
+        <button class="glass-button" style="width: 100%; margin-top: 10px;" onclick="toggleAuthModal()">ЗАКРЫТЬ</button>
+      </div>
+    </div>
+  </div>
+  <script src="words2.js"></script>
+  <script src="words.js"></script>
+  <script src="theory-data.js"></script>
+  <script src="theory-guides.js"></script>
+  <script src="theory-engine.js"></script>
+  <script>
+    // --- СЕРВЕРНАЯ СИНХРОНИЗАЦИЯ ---
+    const API_URL = 'api.php?path='; // Теперь работаем через PHP на Beget
+    const TOKEN_KEY = 'cyber_token';
+    const USER_KEY = 'cyber_username';
+    let authMode = 'login'; // 'login' or 'register'
+
+    function toggleAuthModal() {
+      const modal = document.getElementById('auth-modal');
+      modal.style.display = modal.style.display === 'none' ? 'flex' : 'none';
+      updateAuthUI();
+    }
+
+    function toggleAuthMode() {
+      authMode = authMode === 'login' ? 'register' : 'login';
+      document.getElementById('auth-title').innerText = authMode === 'login' ? 'CYBER ACCESS' : 'CREATE ACCOUNT';
+      document.getElementById('auth-main-btn').innerText = authMode === 'login' ? 'ВХОД' : 'РЕГИСТРАЦИЯ';
+      document.getElementById('auth-switch-text').innerText = authMode === 'login'
+        ? 'Нет аккаунта? Зарегистрироваться'
+        : 'Уже есть аккаунт? Войти';
+    }
+
+    function updateAuthUI() {
+      const token = localStorage.getItem(TOKEN_KEY);
+      const user = localStorage.getItem(USER_KEY);
+      const form = document.getElementById('auth-form-container');
+      const profile = document.getElementById('user-profile-container');
+      const userNameDisp = document.getElementById('current-user-name');
+
+      if (token) {
+        if (form) form.style.display = 'none';
+        if (profile) profile.style.display = 'block';
+        if (document.getElementById('profile-name')) document.getElementById('profile-name').innerText = user;
+        if (userNameDisp) userNameDisp.innerText = user.toUpperCase();
+      } else {
+        if (form) form.style.display = 'block';
+        if (profile) profile.style.display = 'none';
+        if (userNameDisp) userNameDisp.innerText = 'GUEST';
+      }
+    }
+
+    async function handleAuth() {
+      const username = document.getElementById('auth-username').value;
+      const password = document.getElementById('auth-password').value;
+      if (!username || !password) { alert('Введите логин и пароль'); return; }
+
+      const endpoint = authMode === 'login' ? '/auth/login' : '/auth/register';
+      try {
+        const res = await fetch(API_URL + endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.message);
+
+        if (authMode === 'register') {
+          alert('Регистрация успешна! Теперь войдите.');
+          toggleAuthMode();
+        } else {
+          localStorage.setItem(TOKEN_KEY, data.token);
+          localStorage.setItem(USER_KEY, data.username);
+
+          // Проверяем, есть ли уже локальные данные. Если да — спрашиваем про миграцию.
+          if (learnedWords.length > 0) {
+            if (confirm('У вас есть локальные изученные слова. Перенести их в облако?')) {
+              await performMigration();
+            }
+          }
+
+          location.reload();
+        }
+      } catch (e) {
+        alert('Ошибка: ' + e.message);
+      }
+    }
+
+    async function handleLogout() {
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem(USER_KEY);
+      localStorage.removeItem('oxford_learned');
+      localStorage.removeItem('finished_words');
+      localStorage.removeItem('match_pool');
+      location.reload();
+    }
+
+    async function apiPOST(endpoint, data) {
+      const token = localStorage.getItem(TOKEN_KEY);
+      if (!token) return;
+      try {
+        return await fetch(API_URL + endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(data)
+        });
+      } catch (e) { console.error('Sync Error:', e); }
+    }
+
+    async function pullDataFromServer() {
+      const token = localStorage.getItem(TOKEN_KEY);
+      if (!token) return;
+      try {
+        const res = await fetch(API_URL + 'data/all', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+
+        if (data.words) {
+          const learnedArr = []; const finishedArr = []; const matchArr = [];
+          data.words.forEach(w => {
+            const jsWord = {
+              ...w,
+              learnedDate: w.learned_date,     // Сопоставляем DB -> JS
+              timestampAdded: Number(w.timestamp_added),
+              progress: {
+                eng: { level: Number(w.eng_level), nextReview: Number(w.eng_next_review) },
+                rus: { level: Number(w.rus_level), nextReview: Number(w.rus_next_review) }
+              },
+              stats: {
+                eng: { views: 0, scores: { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0 }, totalEarned: 0, totalLost: 0 },
+                rus: { views: 0, scores: { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0 }, totalEarned: 0, totalLost: 0 }
+              }
+            };
+            if (data.stats) {
+              data.stats.filter(s => s.word === w.word).forEach(s => {
+                jsWord.stats[s.mode] = {
+                  views: Number(s.views),
+                  scores: {
+                    0: Number(s.score_0), 1: Number(s.score_1), 2: Number(s.score_2),
+                    3: Number(s.score_3), 4: Number(s.score_4)
+                  },
+                  totalEarned: Number(s.total_earned),
+                  totalLost: Number(s.total_lost)
+                };
+              });
+            }
+            if (Number(w.is_finished) === 1) finishedArr.push(jsWord);
+            else if (Number(w.is_in_match) === 1) matchArr.push(jsWord);
+            else learnedArr.push(jsWord);
+          });
+          localStorage.setItem('oxford_learned', JSON.stringify(learnedArr));
+          localStorage.setItem('finished_words', JSON.stringify(finishedArr));
+          localStorage.setItem('match_pool', JSON.stringify(matchArr));
+        }
+        if (data.settings) {
+          const s = data.settings;
+          localStorage.setItem('user_streak', JSON.stringify({
+            count: Number(s.streak_count),
+            lastDate: s.streak_last_date
+          }));
+          localStorage.setItem('monthly_best', JSON.stringify({
+            record: Number(s.month_best_record),
+            month: s.month_best_month,
+            date: s.streak_last_date // Используем как запасную дату
+          }));
+        }
+      } catch (e) { console.error('Pull Error:', e); }
+    }
+
+    async function performMigration() {
+      const payload = {
+        learned: learnedWords,
+        finished: finishedWords,
+        match: matchPool,
+        streak: JSON.parse(localStorage.getItem('user_streak') || '{"count": 0, "lastDate": ""}'),
+        record: JSON.parse(localStorage.getItem('monthly_best') || '{"record": 0, "date": "", "month": ""}')
+      };
+      await apiPOST('/data/full-migration', payload);
+    }
+
+    // --- Инициализация данных ---
+    // learnedWords уже объявлен в words.js, не используем let/var здесь
+    matchPool = JSON.parse(localStorage.getItem('match_pool')) || [];
+    finishedWords = JSON.parse(localStorage.getItem('finished_words')) || [];
+
+    // При загрузке страницы стягиваем данные с сервера если авторизованы
+    learnedWords = JSON.parse(localStorage.getItem('oxford_learned')) || [];
+    if (localStorage.getItem(TOKEN_KEY)) {
+      pullDataFromServer().then(() => {
+        // Перечитываем после пулла
+        learnedWords = JSON.parse(localStorage.getItem('oxford_learned')) || [];
+        matchPool = JSON.parse(localStorage.getItem('match_pool')) || [];
+        finishedWords = JSON.parse(localStorage.getItem('finished_words')) || [];
+        updateCounter();
+        updateAuthUI();
+        updateXPDisplay();
+      });
+    }
+    // Обновляем статистику при загрузке (независимо от авторизации)
+    updateCounter();
+    updateXPDisplay();
+
+    // Синхронизируем review_stats
+    const reviewStatsLocal = JSON.parse(localStorage.getItem('review_stats') || '{"date": "", "count": 0}');
+    if (reviewStatsLocal.date !== todayDate) {
+      localStorage.setItem('review_stats', JSON.stringify({ date: todayDate, count: 0 }));
+    }
+
+    // --- Управление экранами ---
+    window.switchScreen = function (screenId) {
+      // Прячем абсолютно все блоки контента
+      const screens = ['setup-panel', 'table-container', 'review-container', 'journal-screen', 'match-screen', 'review-modal', 'reading-screen', 'theory-screen'];
+      screens.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+      });
+
+      // Останавливаем таймер Match Mode, если выходим из него
+      if (screenId !== 'match-screen') {
+        clearInterval(matchTimer);
+      }
+
+      // Блок кнопок-фильтров (button-row) показываем только если мы в режиме изучения
+      const btnRow = document.querySelector('.button-row');
+      if (btnRow) {
+        btnRow.style.display = (screenId === 'setup-panel' || screenId === 'table-container') ? 'block' : 'none';
+      }
+
+      const target = document.getElementById(screenId);
+      if (target) {
+        if (screenId === 'setup-panel') {
+          target.style.display = 'flex';
+        } else {
+          target.style.display = 'block';
+        }
+      }
+
+      // Обновление активной кнопки в навигации
+      document.querySelectorAll('.nav-header .glass-button').forEach(btn => btn.classList.remove('active'));
+      const buttons = document.querySelectorAll('.nav-header .glass-button');
+      if (screenId === 'setup-panel' || screenId === 'table-container') buttons[0].classList.add('active');
+      if (screenId === 'review-container') buttons[1].classList.add('active');
+      if (screenId === 'match-screen') buttons[2].classList.add('active');
+      if (screenId === 'journal-screen') buttons[3].classList.add('active');
+      if (screenId === 'reading-screen') {
+        const btns = document.querySelectorAll('.nav-header .glass-button');
+        if (btns[4]) btns[4].classList.add('active');
+      }
+      if (screenId === 'theory-screen') {
+        const btns = document.querySelectorAll('.nav-header .glass-button');
+        if (btns[5]) btns[5].classList.add('active');
+      }
+    }
+
+    // --- Логика Изучения ---
+    window.generateNewList = function () {
+      const level = document.getElementById('filter-level').value;
+      const type = document.getElementById('filter-type').value;
+
+      let pool = allWords.filter(w =>
+        !learnedWords.some(lw => lw.word === w.word) &&
+        !matchPool.some(mw => mw.word === w.word) &&
+        !finishedWords.some(fw => fw.word === w.word)
+      );
+
+      if (level !== 'all') pool = pool.filter(w => w.level.includes(level));
+      if (type !== 'all') pool = pool.filter(w => w.type.includes(type));
+
+      // Приоритет ultraWords (всегда первые)
+      console.log('debug ultraWords exists:', typeof ultraWords !== 'undefined', ultraWords);
+      let ultraPool = [];
+      if (typeof ultraWords !== 'undefined' && ultraWords && ultraWords.length > 0) {
+        ultraPool = ultraWords.filter(w => w && w.word && !learnedWords.some(lw => lw.word === w.word));
+        if (level !== 'all') ultraPool = ultraPool.filter(w => w.level.includes(level));
+        if (type !== 'all') ultraPool = ultraPool.filter(w => w.type.includes(type));
+        // Перемешиваем
+        ultraPool.sort(() => 0.5 - Math.random());
+      }
+
+      // Остальные слова (без слов из ultraPool)
+      let restPool = pool.filter(w => !ultraPool.some(uw => uw.word === w.word));
+      restPool.sort(() => 0.5 - Math.random());
+
+      // ultraPool ВСЕГДА первые, потом остальные (до 20)
+      currentSelection = [...ultraPool, ...restPool].slice(0, 20);
+
+      renderTable();
+      switchScreen('table-container');
+      document.getElementById('setup-panel').style.display = 'flex';
+    }
+
+    function renderTable() {
+      const grid = document.getElementById('words-grid');
+      grid.innerHTML = '';
+      document.getElementById('table-container').style.display = 'block';
+
+      // Получаем список слов из ultraWords
+      const ultraWordsSet = new Set(ultraWords ? ultraWords.map(w => w.word) : []);
+
+      currentSelection.forEach((w, i) => {
+        const isUltra = ultraWordsSet.has(w.word);
+        const row = document.createElement('tr');
+        row.className = isUltra ? 'word-row-ultra' : '';
+        row.innerHTML = `
+          <td data-label="№">${i + 1}${isUltra ? '<span class="ultra-badge">★</span>' : ''}</td>
+          <td class="word-cell" data-label="Слово">
+            <span class="main-word" onclick="addHint('${w.word}')" onmouseover="showHint(event, '${w.word}')" onmouseout="hideHint()">${w.word}</span>
+            <span class="word-tag">${w.type}</span>
+            <div class="mobile-phonetic">${w.phonetic}</div>
+          </td>
+          <td class="phonetic-cell desktop-only" data-label="Транскрипция">${w.phonetic}</td>
+          <td class="translation-cell hidden" data-label="Перевод" onclick="this.classList.toggle('hidden')">
+            <span class="translation-text">${w.translation}</span>
+          </td>
+          <td data-label="Звук" data-lvl="${w.level}"><button class="audio-icon" onclick="playAudio('${w.word.split(',')[0]}')">🔊</button></td>
+          <td data-label="Уровень"><div class="level-box">${w.level}</div></td>
+          <td data-label="Статус">
+            <div class="status-cell-btns">
+              <button class="done-btn" onclick="saveAsLearned('${w.word.replace(/'/g, "\\'")}', this)">✔</button>
+              <button class="finish-btn" title="Завершить слово" onclick="moveToFinished('${w.word.replace(/'/g, "\\'")}', this)">✖</button>
+            </div>
+          </td>
+        `;
+        grid.appendChild(row);
+      });
+      updateCounter();
+    }
+
+    function saveAsLearned(word, btn) {
+      const wordData = allWords.find(w => w.word === word) || (typeof ultraWords !== 'undefined' && ultraWords.find(w => w.word === word));
+      if (wordData && !learnedWords.some(lw => lw.word === word)) {
+        const learnedEntry = {
+          ...wordData,
+          learnedDate: todayDate,
+          timestampAdded: Date.now(),
+          stats: {
+            eng: { views: 0, scores: { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0 }, totalEarned: 0, totalLost: 0 },
+            rus: { views: 0, scores: { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0 }, totalEarned: 0, totalLost: 0 }
+          },
+          progress: {
+            eng: { level: 1, nextReview: Date.now() },
+            rus: { level: 1, nextReview: Date.now() }
+          }
+        };
+        learnedWords.push(learnedEntry);
+        localStorage.setItem('oxford_learned', JSON.stringify(learnedWords));
+
+        // SYNC
+        const syncData = {
+          ...learnedEntry,
+          eng_level: learnedEntry.progress.eng.level,
+          eng_next_review: learnedEntry.progress.eng.nextReview,
+          rus_level: learnedEntry.progress.rus.level,
+          rus_next_review: learnedEntry.progress.rus.nextReview
+        };
+        apiPOST('/data/word/save', syncData);
+        apiPOST('/data/word/stats/save', { word: learnedEntry.word, mode: 'eng', s: learnedEntry.stats.eng });
+        apiPOST('/data/word/stats/save', { word: learnedEntry.word, mode: 'rus', s: learnedEntry.stats.rus });
+
+        animateRowRemoval(btn);
+      }
+    }
+
+    function moveToFinished(word, btn) {
+      if (!confirm(`Завершить работу со словом "${word}"? Оно больше не появится в обучении.`)) return;
+
+      const wordData = allWords.find(w => w.word === word) || learnedWords.find(lw => lw.word === word) || (typeof ultraWords !== 'undefined' && ultraWords.find(w => w.word === word));
+      if (wordData) {
+        // Удаляем из изученных если оно там было
+        learnedWords = learnedWords.filter(lw => lw.word !== word);
+        matchPool = matchPool.filter(mw => mw.word !== word);
+
+        if (!finishedWords.some(fw => fw.word === word)) {
+          finishedWords.push({ ...wordData, finishedDate: todayDate });
+        }
+
+        localStorage.setItem('oxford_learned', JSON.stringify(learnedWords));
+        localStorage.setItem('match_pool', JSON.stringify(matchPool));
+        localStorage.setItem('finished_words', JSON.stringify(finishedWords));
+
+        // SYNC
+        const syncData = {
+          ...wordData,
+          is_finished: 1,
+          is_in_match: 0,
+          eng_level: wordData.progress?.eng.level || 1,
+          eng_next_review: wordData.progress?.eng.nextReview || 0,
+          rus_level: wordData.progress?.rus.level || 1,
+          rus_next_review: wordData.progress?.rus.nextReview || 0
+        };
+        apiPOST('/data/word/save', syncData);
+
+        animateRowRemoval(btn);
+      }
+    }
+
+    function animateRowRemoval(btn) {
+      const row = btn.closest('tr');
+      row.style.transform = 'translateX(50px)';
+      row.style.opacity = '0';
+      setTimeout(() => {
+        row.remove();
+        updateCounter();
+      }, 300);
+    }
+
+    // --- Логика Повторения (SRS) ---
+    let currentReviewWord = null;
+    let reviewMode = 'eng-rus';
+    let reviewSortOrder = 'random';
+
+    function startReview(mode, sortOrder) {
+      reviewMode = mode;
+      reviewSortOrder = sortOrder;
+      switchScreen('review-container');
+      nextReviewWord();
+    }
+
+    function nextReviewWord() {
+      const now = Date.now();
+      const modeKey = reviewMode === 'eng-rus' ? 'eng' : 'rus';
+
+      let available = learnedWords.filter(w => {
+        if (!w.progress) w.progress = { eng: { level: 1, nextReview: 0 }, rus: { level: 1, nextReview: 0 } };
+        return w.progress[modeKey].nextReview <= now;
+      });
+
+      if (available.length === 0) {
+        alert('Все слова на сегодня повторены!');
+        location.reload();
+        return;
+      }
+
+      currentReviewWord = (reviewSortOrder === 'random')
+        ? available[Math.floor(Math.random() * available.length)]
+        : available.sort((a, b) => a.progress[modeKey].level - b.progress[modeKey].level)[0];
+
+      renderReviewCard(modeKey);
+    }
+
+    function renderReviewCard(modeKey) {
+      const wordDisp = document.getElementById('review-word-display');
+      const transDisp = document.getElementById('review-translation');
+      const badge = document.getElementById('review-mode-badge');
+      const lvlTag = document.getElementById('review-level-tag');
+
+      badge.innerText = reviewMode === 'eng-rus' ? 'EN ➔ RU' : 'RU ➔ EN';
+      lvlTag.innerText = `LVL ${currentReviewWord.progress[modeKey].level}`;
+
+      document.getElementById('rating-buttons').style.display = 'none';
+      document.getElementById('show-answer-btn').style.display = 'inline-block';
+      document.getElementById('review-replay-audio').style.display = 'none';
+      transDisp.style.display = 'none';
+      document.getElementById('example-display').innerHTML = ''; // Очищаем пример при смене слова
+      document.getElementById('ai-gen-btn').style.display = 'inline-block'; // Показываем кнопку помощи
+
+      if (reviewMode === 'eng-rus') {
+        wordDisp.innerText = currentReviewWord.word;
+        transDisp.innerText = currentReviewWord.translation;
+      } else {
+        wordDisp.innerText = currentReviewWord.translation;
+        transDisp.innerText = currentReviewWord.word;
+      }
+      document.getElementById('review-phonetic').innerText = currentReviewWord.phonetic;
+
+      // Сетка и цвета
+      const seed = [...currentReviewWord.word].reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      const h1 = seed % 360;
+      const bg = document.getElementById('card-bg') || createCardBg();
+      bg.style.setProperty('--grid-color', `hsla(${h1}, 100%, 60%, 0.15)`);
+      wordDisp.style.color = `hsl(${h1}, 100%, 95%)`;
+    }
+
+    function createCardBg() {
+      const bg = document.createElement('div');
+      bg.id = 'card-bg';
+      bg.innerHTML = '<div class="cyber-grid"></div><div class="cyber-nebula"></div>';
+      document.querySelector('.review-card').prepend(bg);
+      return bg;
+    }
+
+    function showReviewAnswer() {
+      document.getElementById('review-translation').style.display = 'block';
+      document.getElementById('show-answer-btn').style.display = 'none';
+      document.getElementById('rating-buttons').style.display = 'flex';
+      document.getElementById('review-replay-audio').style.display = 'inline-block';
+      playAudio(currentReviewWord.word);
+    }
+
+    function rateWord(score) {
+      const modeKey = reviewMode === 'eng-rus' ? 'eng' : 'rus';
+      const index = learnedWords.findIndex(w => w.word === currentReviewWord.word);
+      if (index === -1) return;
+
+      let w = learnedWords[index];
+      let p = w.progress[modeKey];
+      let stats = w.stats[modeKey];
+
+      stats.views++;
+      stats.scores[score]++;
+
+      // Начисляем XP по новой логике (только score)
+      const xpGain = calculateWordXP(w.level, score);
+      if (xpGain > 0) {
+        const pending = Number(localStorage.getItem('engwords_xp_pending') || 0);
+        const newPending = pending + xpGain;
+        localStorage.setItem('engwords_xp_pending', newPending.toString());
+        // Обновляем отображение общего XP
+        updateXPDisplay();
+      }
+
+      const oldLvl = p.level;
+      let waitHours = 0;
+
+      // --- НОВАЯ ЛОГИКА SRS ---
+      switch (score) {
+        case 4:
+          p.level = p.level * 3;
+          waitHours = p.level; // 1 час за каждый уровень (т.е. p.level часов)
+          break;
+        case 3:
+          p.level = p.level * 2;
+          waitHours = p.level;
+          break;
+        case 2:
+          // Уровень не меняется
+          waitHours = 1; // Убираем на 1 час
+          break;
+        case 1:
+          // В пул MATCH, уровень не меняется
+          sendToMatchPool(w);
+          learnedWords.splice(index, 1);
+          saveAndRefresh();
+          return;
+        case 0:
+          // Уровень / 2 (вверх), в пул MATCH
+          p.level = Math.ceil(p.level / 2);
+          sendToMatchPool(w);
+          learnedWords.splice(index, 1);
+          saveAndRefresh();
+          return;
+      }
+
+      p.nextReview = Date.now() + (waitHours * 60 * 60 * 1000);
+
+      const diff = p.level - oldLvl;
+      if (diff > 0) stats.totalEarned += diff;
+      else stats.totalLost += Math.abs(diff);
+
+      saveAndRefresh();
+
+      // SYNC
+      const syncData = {
+        ...w,
+        eng_level: w.progress.eng.level,
+        eng_next_review: w.progress.eng.nextReview,
+        rus_level: w.progress.rus.level,
+        rus_next_review: w.progress.rus.nextReview
+      };
+      apiPOST('/data/word/save', syncData);
+      apiPOST('/data/word/stats/save', { word: w.word, mode: modeKey, s: stats });
+    }
+
+    function saveAndRefresh() {
+      localStorage.setItem('oxford_learned', JSON.stringify(learnedWords));
+      const reviewStatsLocal = JSON.parse(localStorage.getItem('review_stats') || '{"date": "", "count": 0}');
+      reviewStatsLocal.count++;
+      localStorage.setItem('review_stats', JSON.stringify(reviewStatsLocal));
+      updateCounter();
+      nextReviewWord();
+    }
+
+    function sendToMatchPool(word) {
+      if (!matchPool.some(mw => mw.word === word.word)) {
+        matchPool.push(word);
+        localStorage.setItem('match_pool', JSON.stringify(matchPool));
+
+        // SYNC
+        const syncData = {
+          ...word,
+          is_in_match: 1,
+          eng_level: word.progress.eng.level,
+          eng_next_review: word.progress.eng.nextReview,
+          rus_level: word.progress.rus.level,
+          rus_next_review: word.progress.rus.nextReview
+        };
+        apiPOST('/data/word/save', syncData);
+      }
+    }
+
+    // --- MATCH MODE ---
+    // matchTimer теперь глобальная (см. строку 192)
+    let matchTimeLeft = 30;
+    let matchSelected = null;
+
+    window.startMatchMode = function () {
+      if (matchPool.length < 5) {
+        alert(`Для запуска Match нужно минимум 5 слов в пуле. Сейчас: ${matchPool.length}. (Слова попадают сюда при оценке 0 или 1)`);
+        updateMatchPoolInfo();
+        switchScreen('setup-panel'); // Возвращаемся или остаемся
+        document.getElementById('match-pool-info').style.display = 'block';
+        return;
+      }
+
+      switchScreen('match-screen');
+      const info = document.getElementById('match-pool-info');
+      info.style.display = 'block';
+      info.innerText = `Слов в пуле: ${matchPool.length}`;
+
+      initMatchGame();
+    }
+
+    function initMatchGame() {
+      clearInterval(matchTimer);
+      matchTimeLeft = 30;
+      updateTimerDisplay();
+
+      const pool = [...matchPool].sort(() => 0.5 - Math.random()).slice(0, 5);
+      const words = pool.map(w => ({ id: w.word, text: w.word, type: 'word' }));
+      const trans = pool.map(w => ({ id: w.word, text: w.translation, type: 'trans' }));
+
+      renderMatchGrid(words.sort(() => 0.5 - Math.random()), trans.sort(() => 0.5 - Math.random()));
+
+      matchTimer = setInterval(() => {
+        matchTimeLeft--;
+        updateTimerDisplay();
+        if (matchTimeLeft <= 0) {
+          clearInterval(matchTimer);
+          document.getElementById('match-status-msg').innerText = 'Время вышло! Пересоздание...';
+          document.getElementById('match-status-msg').style.color = '#ff4d4d';
+          setTimeout(initMatchGame, 1500);
+        }
+      }, 1000);
+    }
+
+    function renderMatchGrid(words, trans) {
+      const leftCol = document.getElementById('match-left');
+      const rightCol = document.getElementById('match-right');
+      leftCol.innerHTML = '';
+      rightCol.innerHTML = '';
+
+      words.forEach(w => leftCol.appendChild(createMatchCard(w)));
+      trans.forEach(t => rightCol.appendChild(createMatchCard(t)));
+    }
+
+    function createMatchCard(item) {
+      const div = document.createElement('div');
+      div.className = 'match-card';
+      div.innerText = item.text;
+      div.dataset.id = item.id;
+      div.dataset.type = item.type;
+      div.onclick = () => handleMatchClick(div);
+      return div;
+    }
+
+    function handleMatchClick(card) {
+      if (card.classList.contains('matched')) return;
+      playHoverSound();
+
+      if (matchSelected) {
+        if (matchSelected === card) {
+          card.classList.remove('selected');
+          matchSelected = null;
+          return;
+        }
+
+        if (matchSelected.dataset.id === card.dataset.id && matchSelected.dataset.type !== card.dataset.type) {
+          card.classList.add('matched');
+          matchSelected.classList.add('matched');
+          matchSelected = null;
+          checkMatchVictory();
+        } else {
+          card.classList.add('wrong');
+          document.getElementById('match-status-msg').innerText = 'Ошибка! Сброс игры...';
+          document.getElementById('match-status-msg').style.color = '#ff4d4d';
+          setTimeout(() => {
+            initMatchGame();
+            document.getElementById('match-status-msg').innerText = '';
+          }, 1000);
+          matchSelected.classList.remove('selected');
+          matchSelected = null;
+        }
+      } else {
+        matchSelected = card;
+        card.classList.add('selected');
+      }
+    }
+
+    function checkMatchVictory() {
+      const remaining = document.querySelectorAll('.match-card:not(.matched)');
+      if (remaining.length === 0) {
+        clearInterval(matchTimer);
+
+        // Переносим слова обратно в Learned
+        const currentMatchedIds = Array.from(document.querySelectorAll('.match-card')).map(c => c.dataset.id);
+        const uniqueIds = [...new Set(currentMatchedIds)];
+
+        uniqueIds.forEach(id => {
+          const word = matchPool.find(mw => mw.word === id);
+          if (word) {
+            // Убираем кулдаун (ставим 0), чтобы слова сразу появились в повторении
+            if (!word.progress) word.progress = { eng: { level: 1, nextReview: 0 }, rus: { level: 1, nextReview: 0 } };
+            word.progress.eng.nextReview = Date.now();
+            word.progress.rus.nextReview = Date.now();
+
+            learnedWords.push(word);
+            matchPool = matchPool.filter(mw => mw.word !== id);
+
+            // SYNC
+            const syncData = {
+              ...word,
+              is_in_match: 0,
+              eng_level: word.progress.eng.level,
+              eng_next_review: word.progress.eng.nextReview,
+              rus_level: word.progress.rus.level,
+              rus_next_review: word.progress.rus.nextReview
+            };
+            apiPOST('/data/word/save', syncData);
+          }
+        });
+
+        localStorage.setItem('oxford_learned', JSON.stringify(learnedWords));
+        localStorage.setItem('match_pool', JSON.stringify(matchPool));
+
+        document.getElementById('match-status-msg').innerText = 'Отлично! Слова возвращены в список.';
+        document.getElementById('match-status-msg').style.color = '#4a9eff';
+        setTimeout(() => location.reload(), 1500);
+      }
+    }
+
+    function updateTimerDisplay() {
+      const timerEl = document.getElementById('match-timer');
+      timerEl.innerText = `00:${matchTimeLeft.toString().padStart(2, '0')}`;
+      if (matchTimeLeft <= 10) timerEl.classList.add('timer-pulse');
+      else timerEl.classList.remove('timer-pulse');
+    }
+
+    function updateMatchPoolInfo() {
+      const el = document.getElementById('match-pool-info');
+      if (matchPool.length > 0) {
+        el.style.display = 'block';
+        el.innerText = `В ПУЛЕ MATCH: ${matchPool.length} / 5`;
+      } else {
+        el.style.display = 'none';
+      }
+    }
+
+    // --- ЖУРНАЛ ---
+    function setJournalTab(tab) {
+      currentJournalTab = tab;
+      document.getElementById('tab-learned').classList.toggle('active', tab === 'learned');
+      document.getElementById('tab-finished').classList.toggle('active', tab === 'finished');
+
+      // Скрываем переключатель направления для удаленных слов (там оно не важно)
+      document.getElementById('journal-mode-selector-box').style.display = (tab === 'learned' ? 'flex' : 'none');
+
+      renderJournal();
+    }
+
+    function renderJournal() {
+      const grid = document.getElementById('journal-grid');
+      const searchTerm = document.getElementById('journal-search').value.toLowerCase();
+      grid.innerHTML = '';
+
+      // Журнал должен включать слова из matchPool, если мы смотрим "изученные"
+      let list = (currentJournalTab === 'learned') ? [...learnedWords, ...matchPool] : finishedWords;
+
+      list.filter(w => w.word.toLowerCase().includes(searchTerm) || w.translation.toLowerCase().includes(searchTerm))
+        .forEach(w => {
+          const row = document.createElement('tr');
+          if (currentJournalTab === 'learned') {
+            const p = w.progress[currentJournalMode] || { level: 1, nextReview: 0 };
+            const s = w.stats[currentJournalMode] || { views: 0, scores: { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0 }, totalEarned: 0, totalLost: 0 };
+            const days = Math.floor((Date.now() - (w.timestampAdded || Date.now())) / 86400000);
+
+            // Логика статуса
+            let statusHtml = '';
+            const isInMatch = matchPool.some(mw => mw.word === w.word);
+            const now = Date.now();
+            const waitTime = p.nextReview - now;
+
+            if (isInMatch) {
+              statusHtml = '<span style="color:#00f2fe; font-weight:bold">MATCH</span>';
+            } else if (waitTime > 0) {
+              statusHtml = `<span style="color:#ffa500; font-size:0.8rem">⏳ ${formatTime(waitTime)}</span>`;
+            } else {
+              statusHtml = '<span style="color:#3fb950">READY</span>';
+            }
+
+            row.innerHTML = `
+                <td style="text-align:left" data-label="Слово">${currentJournalMode === 'eng' ? w.word : w.translation}</td>
+                <td data-label="LVL"><div class="level-box">${p.level}</div></td>
+                <td data-label="Просмотры" class="journal-hide-mobile">${s.views}</td>
+                <td data-label="Дней">${days} дн.</td>
+                <td style="color:#ff4d4d" data-label="Score 0" class="journal-hide-mobile">${s.scores[0]}</td>
+                <td style="color:#ffa500" data-label="Score 1" class="journal-hide-mobile">${s.scores[1]}</td>
+                <td style="color:#ffff00" data-label="Score 2" class="journal-hide-mobile">${s.scores[2]}</td>
+                <td style="color:#90ee90" data-label="Score 3" class="journal-hide-mobile">${s.scores[3]}</td>
+                <td style="color:#58a6ff" data-label="Score 4" class="journal-hide-mobile">${s.scores[4]}</td>
+                <td data-label="Прогресс"><span style="color:#3fb950">+${s.totalEarned}</span> / <span style="color:#ff4d4d">-${s.totalLost}</span></td>
+                <td data-label="Статус">${statusHtml}</td>
+             `;
+          } else {
+            row.innerHTML = `
+                <td style="text-align:left"><b>${w.word}</b></td>
+                <td colspan="9" style="text-align:left; opacity:0.7">${w.translation}</td>
+                <td style="font-size:0.7rem">${w.finishedDate || ''}</td>
+             `;
+          }
+          grid.appendChild(row);
+        });
+    }
+
+    function formatTime(ms) {
+      const totalSec = Math.floor(ms / 1000);
+      const h = Math.floor(totalSec / 3600);
+      const m = Math.floor((totalSec % 3600) / 60);
+      if (h > 0) return `${h}ч ${m}м`;
+      return `${m}м`;
+    }
+
+    // --- УТИЛИТЫ ---
+    function updateCounter() {
+      const currentTime = Date.now();
+      ['A1', 'A2', 'B1', 'B2', 'C1'].forEach(lvl => {
+        const count = learnedWords.filter(w => w.level.includes(lvl)).length;
+        if (document.getElementById(`stat-${lvl.toLowerCase()}`)) document.getElementById(`stat-${lvl.toLowerCase()}`).innerText = count;
+      });
+
+      document.getElementById('stat-avail-learn').innerText = allWords.length - learnedWords.length - finishedWords.length - matchPool.length;
+      document.getElementById('stat-avail-eng').innerText = learnedWords.filter(w => w.progress.eng.nextReview <= currentTime).length;
+      document.getElementById('stat-avail-rus').innerText = learnedWords.filter(w => w.progress.rus.nextReview <= currentTime).length;
+      document.getElementById('stat-today-new').innerText = learnedWords.filter(w => w.learnedDate === todayDate).length;
+      const reviewStatsLocal = JSON.parse(localStorage.getItem('review_stats') || '{"date": "", "count": 0}');
+      document.getElementById('stat-today-rev').innerText = reviewStatsLocal.count;
+      document.getElementById('learned-stat').innerText = learnedWords.length;
+
+      updateStreakDisplay();
+      updateMatchPoolInfo();
+      updateMonthlyBest();
+    }
+
+    function updateMonthlyBest() {
+      const todayNewCount = learnedWords.filter(w => w.learnedDate === todayDate).length;
+      const currentMonth = todayDate.substring(0, 7); // "YYYY-MM"
+
+      let monthlyBest = { month: "", record: 0, date: "" };
+      try {
+        const stored = localStorage.getItem('monthly_best');
+        if (stored) monthlyBest = JSON.parse(stored);
+      } catch (e) {
+        // Если данные повреждены, используем значения по умолчанию
+      }
+
+      // Инициализация если месяц сменился или данных нет
+      if (monthlyBest.month !== currentMonth) {
+        monthlyBest = {
+          month: currentMonth,
+          record: todayNewCount,
+          date: todayDate
+        };
+      } else if (todayNewCount > monthlyBest.record) {
+        monthlyBest.record = todayNewCount;
+        monthlyBest.date = todayDate;
+      }
+
+      localStorage.setItem('monthly_best', JSON.stringify(monthlyBest));
+
+      // SYNC settings
+      const streakData = JSON.parse(localStorage.getItem('user_streak') || '{"count": 0, "lastDate": ""}');
+      apiPOST('/data/settings/save', {
+        streak_count: streakData.count,
+        streak_last_date: streakData.lastDate,
+        month_best_record: monthlyBest.record,
+        month_best_month: monthlyBest.month
+      });
+
+      const el = document.getElementById('stat-month-record');
+      if (el && monthlyBest.date) {
+        const dateObj = new Date(monthlyBest.date);
+        const day = dateObj.getDate();
+        const monthName = dateObj.toLocaleString('ru-RU', { month: 'short' });
+        el.innerText = `${day} ${monthName}: ${monthlyBest.record}`;
+      }
+    }
+
+    function updateStreakDisplay() {
+      let streakData = { lastDate: "", count: 0 };
+      try {
+        const stored = localStorage.getItem('user_streak');
+        if (stored) streakData = JSON.parse(stored);
+      } catch (e) {
+        // Если данные повреждены, используем значения по умолчанию
+      }
+
+      const today = todayDate;
+      const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+
+      if (streakData.lastDate !== today) {
+        if (streakData.lastDate === yesterday) {
+          streakData.count++;
+        } else if (streakData.lastDate !== "") {
+          streakData.count = 0;
+        } else {
+          streakData.count = 1;
+        }
+        streakData.lastDate = today;
+        localStorage.setItem('user_streak', JSON.stringify(streakData));
+      }
+      document.getElementById('stat-streak').innerText = streakData.count;
+    }
+
+    async function playAudio(word) {
+      if (!word) return;
+      const cleanWord = word.split(',')[0].trim();
+      const ttsProxyUrl = 'https://script.google.com/macros/s/AKfycbzIAHeVKj4iOQwIiCuDtEDVCuLFuz8ZseGP-zNUVMlRxZft1iVMuxxswRLRiPBL3Rr0Gg/exec';
+
+      try {
+        const response = await fetch(ttsProxyUrl, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'tts',
+            text: cleanWord
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.audioData) {
+          // Создаем аудио из пришедшей строки Base64
+          const audio = new Audio(data.audioData);
+          await audio.play();
+        } else {
+          throw new Error("Аудио-данные не получены");
+        }
+      } catch (e) {
+        console.error("Ошибка прокси-озвучки:", e);
+        // Резервный системный голос
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(cleanWord);
+        utter.lang = 'en-US';
+        window.speechSynthesis.speak(utter);
+      }
+    }
+    async function generateExampleSentence(word) {
+      const btn = document.getElementById('ai-gen-btn');
+      const displayArea = document.getElementById('example-display');
+
+      if (!word) return;
+      const cleanWord = word.split(',')[0].trim();
+
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '⏳ Thinking...';
+      btn.disabled = true;
+
+      const proxyUrl = 'https://script.google.com/macros/s/AKfycbz45sNzqA6uWyXgTpjwLcQQrxuk0IzCWl80gf5HKK96SdxzKQLTrDJVcLTRwg1uog3N/exec';
+
+      try {
+        const response = await fetch(proxyUrl, {
+          method: 'POST',
+          body: JSON.stringify({
+            model: 'llama-3.1-8b-instant',
+            messages: [
+              {
+                role: 'system',
+                content: `You are a helpful English teacher. 
+            RULES:
+            1. Provide ONE short natural sentence with the word.
+            2. Provide an accurate Russian translation.
+            3. Return ONLY JSON: {"sentence": "...", "translation": "..."}`
+              },
+              {
+                role: 'user',
+                content: `Word: "${cleanWord}"`
+              }
+            ],
+            response_format: { type: 'json_object' },
+            temperature: 0.9,
+          }),
+        });
+
+        const data = await response.json();
+        const result = JSON.parse(data.choices[0].message.content);
+
+        if (displayArea) {
+          const newExample = document.createElement('div');
+          newExample.className = 'ai-example-item';
+          // Стили оставил черными, как в твоем коде, но добавил немного отступов
+          newExample.style.cssText = `
+        padding: 12px;
+        margin-bottom: 12px;
+        background: #000000;
+        color: #ffffff;
+        border-radius: 8px;
+        border-left: 4px solid #4CAF50;
+        font-family: sans-serif;
+        animation: fadeIn 0.3s ease;
+      `;
+
+          // Подсветка слова
+          const regex = new RegExp(`(${cleanWord})`, 'gi');
+          const highlightedSentence = result.sentence.replace(regex, '<strong style="color: #4CAF50;">$1</strong>');
+
+          // Формируем HTML со спойлером
+          newExample.innerHTML = `
+        <div style="margin-bottom: 8px; font-size: 1.1em;">${highlightedSentence}</div>
+        <details style="cursor: pointer; font-size: 0.9em; color: #bbb;">
+          <summary style="outline: none; list-style: none;">Показать перевод</summary>
+          <div style="margin-top: 5px; color: var(--text-primary, #e6edf3); border-top: 1px solid #333; padding-top: 5px;">
+            ${result.translation}
+          </div>
+        </details>
+      `;
+
+          displayArea.insertBefore(newExample, displayArea.firstChild);
+        }
+
+      } catch (error) {
+        console.error('Ошибка:', error);
+      } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      }
+    } function downloadBackup() {
+      const data = { learned: learnedWords, finished: finishedWords, match: matchPool, streak: localStorage.getItem('user_streak') };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `cyber_progress_${todayDate}.json`;
+      a.click();
+    }
+
+    function restoreBackup(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (data.learned) localStorage.setItem('oxford_learned', JSON.stringify(data.learned));
+          if (data.finished) localStorage.setItem('finished_words', JSON.stringify(data.finished));
+          if (data.match) localStorage.setItem('match_pool', JSON.stringify(data.match));
+          if (data.streak) localStorage.setItem('user_streak', data.streak);
+          alert('Прогресс успешно загружен! Приложение будет перезагружено.');
+          location.reload();
+        } catch (err) {
+          alert('Ошибка при чтении файла JSON!');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function closeGuide() {
+      if (document.getElementById('dont-show-guide').checked) {
+        localStorage.setItem('cyber_guide_hidden', 'true');
+      }
+      document.getElementById('guide-modal').style.display = 'none';
+      document.body.style.overflow = '';
+    }
+
+    // --- ЖУРНАЛ ---
+    window.showJournal = function () {
+      switchScreen('journal-screen');
+      document.querySelectorAll('.nav-header .glass-button').forEach(btn => btn.classList.remove('active'));
+      const buttons = document.querySelectorAll('.nav-header .glass-button');
+      if (buttons[3]) buttons[3].classList.add('active'); // Кнопка "Журнал"
+
+      window.scrollTo(0, 0);
+      renderJournal();
+    }
+
+    function showReading() {
+      switchScreen('reading-screen');
+      window.scrollTo(0, 0);
+    }
+
+    async function generateStory() {
+      if (learnedWords.length < 5) {
+        alert('Нужно хотя бы 5 изученных слов для генерации интересного рассказа!');
+        return;
+      }
+
+      const btn = document.getElementById('gen-story-btn');
+      const placeholder = document.getElementById('reading-placeholder');
+      const display = document.getElementById('story-display');
+      const textEn = document.getElementById('story-text-en');
+      const textRu = document.getElementById('story-text-ru');
+
+      // Ограничим выборку 10-15 словами, чтобы рассказ был логичным
+      const shuffled = [...learnedWords].sort(() => 0.5 - Math.random());
+      const selectedWords = shuffled.slice(0, 30);
+      const wordsString = selectedWords.map(w => w.word.split(',')[0].trim()).join(', ');
+
+      btn.innerHTML = '⏳ CYBER BRAIN THINKING...';
+      btn.disabled = true;
+      if (placeholder) placeholder.style.display = 'none';
+
+      const proxyUrl = 'https://script.google.com/macros/s/AKfycbz45sNzqA6uWyXgTpjwLcQQrxuk0IzCWl80gf5HKK96SdxzKQLTrDJVcLTRwg1uog3N/exec';
+
+      try {
+        const response = await fetch(proxyUrl, {
+          method: 'POST',
+          body: JSON.stringify({
+            model: 'llama-3.1-8b-instant',
+            messages: [
+              {
+                role: 'system',
+                content: `You are a creative writer. Write a short story (15-20 sentences) in English using the words provided.
+            RULES:
+            1. Wrap the used words in <b>tags</b>.
+            2. Return ONLY a JSON object with keys "story_en" and "story_ru".`
+              },
+              {
+                role: 'user',
+                content: `Words to include: ${wordsString}.`
+              }
+            ],
+            response_format: { type: 'json_object' },
+            temperature: 0.7,
+          }),
+        });
+
+        const data = await response.json();
+        console.log("Ответ от прокси:", data); // Для отладки
+
+        // Проверяем структуру ответа (безопасный способ)
+        let content;
+        if (data.choices && data.choices[0] && data.choices[0].message) {
+          content = data.choices[0].message.content;
+        } else if (data.content) {
+          content = data.content;
+        }
+
+        if (!content) throw new Error("Empty response from AI");
+
+        const result = typeof content === 'string' ? JSON.parse(content) : content;
+
+        if (textEn && textRu) {
+          textEn.innerHTML = result.story_en;
+          textRu.innerHTML = result.story_ru;
+          display.style.display = 'block';
+          display.scrollIntoView({ behavior: 'smooth' });
+        }
+
+      } catch (error) {
+        console.error('Ошибка генерации рассказа:', error);
+        alert('Cyber Brain перегружен. Попробуйте уменьшить количество слов или нажать еще раз.');
+        if (placeholder) placeholder.style.display = 'block';
+      } finally {
+        btn.innerHTML = 'ГЕНЕРИРОВАТЬ НОВЫЙ РАССКАЗ';
+        btn.disabled = false;
+      }
+    }
+    // --- Функционал ПОДСКАЗОК ---
+    function addHint(word) {
+      const currentHint = localStorage.getItem(`hint_${word}`) || '';
+      const newHint = prompt(`Введите подсказку/ассоциацию для "${word}":`, currentHint);
+      if (newHint !== null) {
+        localStorage.setItem(`hint_${word}`, newHint);
+      }
+    }
+
+    function showHint(event, word) {
+      const hint = localStorage.getItem(`hint_${word}`);
+      if (hint) {
+        const tooltip = document.getElementById('tooltip');
+        const target = event.currentTarget;
+        tooltip.innerText = `💡 ${hint}`;
+        tooltip.style.display = 'block';
+        target.appendChild(tooltip);
+      }
+    }
+
+    function hideHint() {
+      const tooltip = document.getElementById('tooltip');
+      tooltip.style.display = 'none';
+      document.body.appendChild(tooltip);
+    }
+
+    // Глобальные обработчики для наведения и кликов
+    const hoverSound = new Audio('music/notification.mp3');
+    hoverSound.volume = 0.05;
+    function playHoverSound() {
+      hoverSound.currentTime = 0;
+      hoverSound.play().catch(() => { });
+    }
+
+    document.addEventListener('mouseover', (e) => {
+      if (e.target.closest('button') || e.target.closest('select')) playHoverSound();
+    });
+
+    document.addEventListener('click', (e) => {
+      const trans = e.target.closest('.translation-cell');
+      if (trans) {
+        playHoverSound();
+        trans.classList.add('flash-active');
+        setTimeout(() => trans.classList.remove('flash-active'), 200);
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (document.getElementById('review-container').style.display === 'block') {
+        const showBtn = document.getElementById('show-answer-btn');
+        if (e.code === 'Space' && showBtn.style.display !== 'none') {
+          e.preventDefault();
+          showReviewAnswer();
+        } else if (['0', '1', '2', '3', '4'].includes(e.key)) {
+          if (document.getElementById('rating-buttons').style.display === 'flex') {
+            rateWord(parseInt(e.key));
+          }
+        }
+      }
+    });
+
+    window.setJournalMode = (mode) => {
+      window.currentJournalMode = mode;
+      document.getElementById('j-mode-eng').classList.toggle('active', mode === 'eng');
+      document.getElementById('j-mode-rus').classList.toggle('active', mode === 'rus');
+      renderJournal();
+    };
+
+    function shuffleCurrentList() {
+      currentSelection.sort(() => 0.5 - Math.random());
+      renderTable();
+    }
+
+    function replayCurrentAudio() {
+      if (currentReviewWord) playAudio(currentReviewWord.word);
+    }
+
+    function closeModal() {
+      document.getElementById('review-modal').style.display = 'none';
+    }
+
+    function selectOption(type, value) {
+      if (type === 'mode') {
+        reviewMode = value;
+        document.getElementById('mode-en-ru').classList.toggle('active', value === 'eng-rus');
+        document.getElementById('mode-ru-en').classList.toggle('active', value === 'rus-eng');
+      } else if (type === 'sort') {
+        reviewSortOrder = value;
+        document.getElementById('sort-random').classList.toggle('active', value === 'random');
+        document.getElementById('sort-level').classList.toggle('active', value === 'level');
+      }
+    }
+
+    function confirmReviewStart() {
+      closeModal();
+      startReview(reviewMode, reviewSortOrder);
+    }
+
+    let journalSortDir = 1; // 1 for DESC, -1 for ASC
+    let lastCriteria = '';
+
+    function sortJournal(criteria) {
+      if (lastCriteria === criteria) {
+        journalSortDir *= -1;
+      } else {
+        journalSortDir = 1;
+        lastCriteria = criteria;
+      }
+
+      const mode = currentJournalMode || 'eng';
+      const now = Date.now();
+
+      // Сортируем основные списки
+      const sortFn = (a, b) => {
+        let valA, valB;
+
+        const sA = a.stats?.[mode] || { views: 0, scores: { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0 }, totalEarned: 0, totalLost: 0 };
+        const sB = b.stats?.[mode] || { views: 0, scores: { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0 }, totalEarned: 0, totalLost: 0 };
+        const pA = a.progress?.[mode] || { level: 1, nextReview: 0 };
+        const pB = b.progress?.[mode] || { level: 1, nextReview: 0 };
+
+        switch (criteria) {
+          case 'word':
+            return journalSortDir * a.word.localeCompare(b.word);
+          case 'level':
+            valA = pA.level;
+            valB = pB.level;
+            break;
+          case 'views':
+            valA = sA.views;
+            valB = sB.views;
+            break;
+          case 'days':
+            valA = a.timestampAdded || 0;
+            valB = b.timestampAdded || 0;
+            break;
+          case 'score0': valA = sA.scores[0]; valB = sB.scores[0]; break;
+          case 'score1': valA = sA.scores[1]; valB = sB.scores[1]; break;
+          case 'score2': valA = sA.scores[2]; valB = sB.scores[2]; break;
+          case 'score3': valA = sA.scores[3]; valB = sB.scores[3]; break;
+          case 'score4': valA = sA.scores[4]; valB = sB.scores[4]; break;
+          case 'diff':
+            valA = sA.totalEarned - sA.totalLost;
+            valB = sB.totalEarned - sB.totalLost;
+            break;
+          case 'status':
+            const getStatusScore = (w) => {
+              if (matchPool.some(mw => mw.word === w.word)) return 3;
+              if (w.progress?.[mode]?.nextReview <= now) return 2;
+              return 1;
+            };
+            valA = getStatusScore(a);
+            valB = getStatusScore(b);
+            break;
+          default:
+            return 0;
+        }
+
+        return (valB - valA) * journalSortDir;
+      };
+
+      if (currentJournalTab === 'learned') {
+        learnedWords.sort(sortFn);
+      } else {
+        finishedWords.sort(sortFn);
+      }
+
+      renderJournal();
+    }
+
+    window.currentJournalMode = 'eng';
+    updateCounter();
+
+    // Проверка гида при входе
+    window.addEventListener('load', () => {
+      if (localStorage.getItem('cyber_guide_hidden') !== 'true') {
+        document.getElementById('guide-modal').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+      }
+    });
+  </script>
+</body>
+
+</html>

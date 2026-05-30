@@ -1,0 +1,583 @@
+/* Базовые сбросы для модалки */
+* {
+  box-sizing: border-box;
+}
+
+.typing-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+}
+
+.typing-modal {
+  background: linear-gradient(145deg, #0d1f3c, #081525);
+  border: 1px solid #2d4a7c;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 1000px;
+  height: 90vh;
+  max-height: 800px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Кнопки навигации */
+.typing-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: transparent;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  z-index: 100;
+  padding: 8px;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.typing-close-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.typing-back-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid #2d4a7c;
+  color: #88a0c8;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.typing-back-btn:hover {
+  border-color: #58a6ff;
+  color: #fff;
+  background: rgba(88, 166, 255, 0.1);
+}
+
+/* Основные контейнеры состояний */
+.typing-select-view,
+.typing-view-solution,
+.typing-typing-view,
+.typing-result-view {
+  padding: 30px 40px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Шапка */
+.typing-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.typing-header h2 {
+  font-size: 28px;
+  color: #58a6ff;
+  margin: 0 0 10px 0;
+}
+
+.typing-ticket-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 170, 0, 0.1);
+  color: #ffaa00;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  border: 1px solid rgba(255, 170, 0, 0.3);
+}
+
+/* Фильтры */
+.typing-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 24px;
+  justify-content: center;
+}
+
+.typing-filter-btn {
+  background: #1a2a4a;
+  border: 1px solid #2d4a7c;
+  color: #88a0c8;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: 0.2s;
+}
+
+.typing-filter-btn.active {
+  background: #58a6ff;
+  color: #0d1f3c;
+  border-color: #58a6ff;
+  font-weight: 600;
+}
+
+/* Сетка задач */
+.typing-task-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  max-height: 450px;
+  overflow-y: auto;
+  padding: 10px 16px 0 16px;
+}
+
+.typing-task-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.typing-task-list::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.typing-task-list::-webkit-scrollbar-thumb {
+  background: #2d4a7c;
+  border-radius: 3px;
+}
+
+.typing-task-list::-webkit-scrollbar-thumb:hover {
+  background: #58a6ff;
+}
+
+.typing-task-card {
+  background: rgba(26, 42, 74, 0.4);
+  border: 1px solid #2d4a7c;
+  border-radius: 12px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(4px);
+}
+
+.typing-task-card:hover {
+  border-color: #58a6ff;
+  background: rgba(58, 90, 138, 0.35);
+  transform: perspective(600px) translateZ(20px);
+  box-shadow: 0 8px 32px rgba(88, 166, 255, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+}
+
+.typing-task-card.selected {
+  border-color: #58a6ff;
+  background: rgba(58, 90, 138, 0.45);
+  transform: perspective(600px) translateZ(16px);
+  box-shadow: 0 6px 24px rgba(88, 166, 255, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(12px);
+}
+
+.typing-task-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.typing-task-title {
+  font-weight: 600;
+  font-size: 14px;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.typing-task-category {
+  font-size: 11px;
+  color: #6688aa;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.typing-task-xp {
+  font-size: 11px;
+  color: #ffd700;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.typing-task-card.cooldown {
+  opacity: 0.7;
+  cursor: not-allowed;
+  position: relative;
+  overflow: hidden;
+}
+
+.typing-cooldown-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(0, 0, 0, 0.1),
+    rgba(0, 0, 0, 0.1) 10px,
+    rgba(0, 0, 0, 0.3) 10px,
+    rgba(0, 0, 0, 0.3) 20px
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  border-radius: 12px;
+}
+
+.typing-cooldown-text {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.8);
+  padding: 6px 12px;
+  border-radius: 8px;
+  color: #ffaa00;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Сложность */
+.typing-difficulty {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.typing-difficulty.easy {
+  background: rgba(34, 197, 94, 0.15);
+  color: #22c55e;
+}
+
+.typing-difficulty.medium {
+  background: rgba(251, 191, 36, 0.15);
+  color: #fbbf24;
+}
+
+.typing-difficulty.hard {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+/* Превью секция */
+.typing-preview-section {
+  background: rgba(13, 31, 60, 0.8);
+  border: 1px solid #2d4a7c;
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: auto;
+}
+
+.typing-theory {
+  font-size: 14px;
+  color: #a0b0c0;
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+/* Код и редактор */
+.typing-code-preview {
+  background: #1e1e1e;
+  border-radius: 8px;
+  border: 1px solid #2d4a7c;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.typing-editor-container {
+  background: #1e1e1e;
+  border: 1px solid #2d4a7c;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+/* Тесты */
+.typing-tests-section {
+  background: rgba(13, 31, 60, 0.8);
+  border: 1px solid #2d4a7c;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.typing-tests-section h4 {
+  margin: 0 0 12px 0;
+  color: #58a6ff;
+  font-size: 14px;
+}
+
+.typing-tests-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.typing-test-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  font-family: 'Fira Code', monospace;
+  color: #a0b0c0;
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+}
+
+.typing-test-input {
+  color: #88a0c8;
+}
+
+.typing-test-expected {
+  color: #22c55e;
+}
+
+/* Геймплей заголовок */
+.typing-typing-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.typing-timer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.typing-typing-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 20px;
+  gap: 12px;
+}
+
+.typing-stats {
+  display: flex;
+  gap: 12px;
+  font-weight: 600;
+  color: #88a0c8;
+  font-size: 13px;
+}
+
+.typing-action-buttons {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+/* Результаты */
+.typing-result-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+.typing-result-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 30px;
+}
+
+.result-stat {
+  background: rgba(26, 42, 74, 0.6);
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #2d4a7c;
+  text-align: center;
+}
+
+.stat-label {
+  display: block;
+  font-size: 12px;
+  color: #88a0c8;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 800;
+  color: #fff;
+}
+
+.typing-test-results {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.typing-test-result-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-family: 'Fira Code', monospace;
+}
+
+.typing-test-result-item.passed {
+  background: rgba(34, 197, 94, 0.15);
+  color: #22c55e;
+}
+
+.typing-test-result-item.failed {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.typing-xp-breakdown {
+  background: rgba(26, 42, 74, 0.6);
+  border: 1px solid #2d4a7c;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.typing-xp-breakdown h4 {
+  color: #58a6ff;
+  margin: 0 0 12px 0;
+  font-size: 14px;
+}
+
+.xp-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 13px;
+  color: #a0b0c0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.xp-item:last-of-type {
+  border-bottom: none;
+}
+
+.xp-total {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0 0 0;
+  margin-top: 8px;
+  border-top: 1px solid #2d4a7c;
+  font-weight: 700;
+  color: #ffd700;
+  font-size: 15px;
+}
+
+/* Кнопки действий */
+.typing-preview-buttons,
+.typing-result-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.ready-btn {
+  background: linear-gradient(135deg, #58a6ff, #1f6feb);
+  color: #fff;
+  border: none;
+  padding: 12px 28px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: 0.2s;
+  box-shadow: 0 4px 15px rgba(31, 111, 235, 0.3);
+}
+
+.ready-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(31, 111, 235, 0.4);
+}
+
+.typing-random-btn {
+  background: #ffaa00;
+  color: #0d1f3c;
+  border: none;
+  padding: 14px 30px;
+  border-radius: 10px;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-transform: uppercase;
+  transition: 0.2s;
+
+  /* ДОБАВЬ ЭТИ ДВЕ СТРОЧКИ */
+  margin: 20px auto;
+  /* Центрирует кнопку внешними отступами */
+  align-self: center;
+  /* Если родитель — flex-контейнер */
+}
+
+.typing-random-btn:hover {
+  background: #ffc247;
+  transform: scale(1.02);
+}
+
+/* Результаты валидации (в процессе ввода) */
+.typing-validation-results {
+  margin-top: 15px;
+  display: flex;
+  justify-content: center;
+}
+
+.validation-result {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.validation-result.passed {
+  background: rgba(34, 197, 94, 0.2);
+  color: #22c55e;
+}
+
+.validation-result.failed {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}

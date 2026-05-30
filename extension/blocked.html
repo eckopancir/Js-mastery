@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Доступ ограничен</title>
+  <style>
+    body { 
+      font-family: sans-serif; 
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      height: 100vh; 
+      background: #f44336; 
+      color: white; 
+      text-align: center;
+      margin: 0;
+    }
+    .container { max-width: 500px; padding: 20px; }
+    h1 { font-size: 48px; margin-bottom: 10px; }
+    p { font-size: 18px; margin-bottom: 30px; }
+    button { 
+      padding: 15px 30px; 
+      font-size: 16px; 
+      background: white; 
+      color: #f44336; 
+      border: none; 
+      border-radius: 5px; 
+      cursor: pointer; 
+      font-weight: bold;
+    }
+    button:hover { opacity: 0.9; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🚫 Недостаточно баллов!</h1>
+    <p>Ты потратил все баллы на развлечения. Чтобы продолжить сидеть на этом сайте, пополни баланс через расширение или иди учись!</p>
+    <button id="goBackBtn">Вернуться назад</button>
+  </div>
+  <script src="blocked.js"></script>
+</body>
+</html>
