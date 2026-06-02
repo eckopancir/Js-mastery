@@ -41,7 +41,9 @@ import {
   PanelBottom,
   Globe,
 } from "lucide-react";
-import { tasks } from "./tasks";
+import { tasks as tasksJs } from "./tasks";
+import { tasksGo } from "./tasksGo";
+const tasks = [...tasksJs, ...tasksGo];
 import { teoriaTasks, getTeoriaTaskByCard } from "./tasksTeoria";
 import { ONBOARDING_STEPS } from "./onboardingData";
 import { playSound } from "./utils/sounds";
@@ -527,7 +529,7 @@ function App() {
   const [draggedTaskId, setDraggedTaskId] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragOverZone, setDragOverZone] = useState(null);
-  const [currentStack, setCurrentStack] = useState("JavaScript");
+  const [currentStack, setCurrentStack] = useState("Go");
   const [showStackMenu, setShowStackMenu] = useState(false);
   const [expandedModules, setExpandedModules] = useState({ Основы: true });
   const [selectedCard, setSelectedCard] = useState(null); // card name currently open
@@ -654,6 +656,7 @@ function App() {
     React: ["Hooks", "Components", "Context"],
     Layout: ["Flexbox", "Grid", "Animations"],
     Git: ["Basics", "Collaboration"],
+    Go: ["Основы"],
   };
 
   const [heatmapHoverDate, setHeatmapHoverDate] = useState(
@@ -740,7 +743,7 @@ function App() {
   const taskCounts = useMemo(() => {
     const counts = {};
     const now = Date.now();
-    ["JavaScript", "TypeScript", "React", "Layout", "Git"].forEach((stack) => {
+    ["JavaScript", "TypeScript", "React", "Layout", "Git", "Go"].forEach((stack) => {
       const stackTasks = tasks.filter(
         (t) => t.stack === stack && t.id < 10000 && t.card,
       );
@@ -1156,7 +1159,6 @@ function App() {
           tasks,
           setNotifs,
           playSound,
-          currentStack,
         }),
     });
   };

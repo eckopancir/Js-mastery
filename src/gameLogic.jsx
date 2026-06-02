@@ -469,7 +469,6 @@ export const finishValidation = ({
   taskStartTime,
   setAiActiveTask,
   setStats,
-  currentStack,
   checkAchievements,
   tasks,
   setNotifs,
@@ -497,18 +496,17 @@ export const finishValidation = ({
       const diffMult =
         { Easy: 1, Medium: 2, Hard: 3 }[displayTask.difficulty] || 1;
       const aiXpMult = isAi ? 2 : 1;
-      const allStackMult = currentStack === "All" ? 2 : 1;
 
       const isFirstPass = (prevTask.passedCount || 0) === 0;
 
       let earnedXp = 0;
       if (isFirstPass) {
-        earnedXp = basePoints * diffMult * aiXpMult * allStackMult;
+        earnedXp = basePoints * diffMult * aiXpMult;
       }
 
       let earnedAiPoints = 0;
       if (isAi && isFirstPass) {
-        earnedAiPoints = (POINT_VALUES[displayTask.mode] || 1) * allStackMult;
+        earnedAiPoints = POINT_VALUES[displayTask.mode] || 1;
       }
 
       const addTicketsToInventory = (inventory, ticketsToAdd) => {

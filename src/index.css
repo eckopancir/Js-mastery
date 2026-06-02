@@ -951,6 +951,26 @@ body {
   color: var(--blue-color);
 }
 
+.chapter-group {
+  margin-bottom: 4px;
+}
+.chapter-group:last-child {
+  margin-bottom: 0;
+}
+
+.chapter-group-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px 4px;
+  font-size: 0.7rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgba(47, 129, 247, 0.6);
+  pointer-events: none;
+}
+
 .logo span {
   color: var(--text-primary);
 }

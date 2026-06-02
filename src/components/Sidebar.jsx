@@ -21,7 +21,9 @@ import {
   Award,
   Brain,
   Hash,
-  Grid3X3,
+  Globe,
+  Server,
+  Cpu,
 } from "lucide-react";
 import TheoryBlock from "./TheoryBlock";
 import TheoryHeader from "./TheoryHeader";
@@ -128,32 +130,28 @@ const Sidebar = ({
 
   const cardProgress = getCardProgress();
 
-  const getStacksWithCards = () => {
-    const stacksWithCards = new Set();
-    Object.keys(stats.cardStats || {}).forEach((cardName) => {
-      const task = tasks.find((t) => t.card === cardName && t.stack);
-      if (task?.stack) stacksWithCards.add(task.stack);
-    });
-    return stacksWithCards;
-  };
-
-  const stacksWithCards = getStacksWithCards();
-  const hasMultipleStacks = stacksWithCards.size >= 3;
-
-  const baseStackOptions = [
-    { id: "JavaScript", icon: <Code2 size={16} />, label: "JavaScript" },
-    { id: "TypeScript", icon: <Shield size={16} />, label: "TypeScript" },
-    { id: "React", icon: <Layers size={16} />, label: "React.js" },
-    { id: "Layout", icon: <BookOpen size={16} />, label: "Layout & CSS" },
-    { id: "Git", icon: <Zap size={16} />, label: "Git & DevOps" },
+  const CHAPTER_STACKS = [
+    {
+      name: "Frontend",
+      icon: <Globe size={16} />,
+      stacks: [
+        { id: "JavaScript", icon: <Code2 size={16} />, label: "JavaScript" },
+        { id: "TypeScript", icon: <Shield size={16} />, label: "TypeScript" },
+        { id: "React", icon: <Layers size={16} />, label: "React.js" },
+        { id: "Layout", icon: <BookOpen size={16} />, label: "Layout & CSS" },
+        { id: "Git", icon: <Zap size={16} />, label: "Git & DevOps" },
+      ],
+    },
+    {
+      name: "Backend",
+      icon: <Server size={16} />,
+      stacks: [
+        { id: "Go", icon: <Cpu size={16} />, label: "Go" },
+      ],
+    },
   ];
 
-  const stackOptions = hasMultipleStacks
-    ? [
-        { id: "All", icon: <Grid3X3 size={16} />, label: "All (x2 XP)" },
-        ...baseStackOptions,
-      ]
-    : baseStackOptions;
+
 
   return (
     <aside className={`sidebar ${sidebarOpen ? "open" : "closed"}`}>
@@ -168,19 +166,27 @@ const Sidebar = ({
               <span>{currentStack}</span>{" "}
               <Zap size={14} className="logo-spark" />
             </div>
-            {showStackMenu && (
+              {showStackMenu && (
               <div className="stack-selector-menu">
-                {stackOptions.map((s) => (
-                  <div
-                    key={s.id}
-                    className={`stack-opt ${currentStack === s.id ? "active" : ""}`}
-                    onClick={() => {
-                      setCurrentStack(s.id);
-                      setShowStackMenu(false);
-                      playSound("click");
-                    }}
-                  >
-                    {s.icon} <span>{s.label}</span>
+                {CHAPTER_STACKS.map((chapter) => (
+                  <div key={chapter.name} className="chapter-group">
+                    <div className="chapter-group-header">
+                      {chapter.icon}
+                      <span>{chapter.name}</span>
+                    </div>
+                    {chapter.stacks.map((s) => (
+                      <div
+                        key={s.id}
+                        className={`stack-opt ${currentStack === s.id ? "active" : ""}`}
+                        onClick={() => {
+                          setCurrentStack(s.id);
+                          setShowStackMenu(false);
+                          playSound("click");
+                        }}
+                      >
+                        {s.icon} <span>{s.label}</span>
+                      </div>
+                    ))}
                   </div>
                 ))}
               </div>
