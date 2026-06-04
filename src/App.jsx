@@ -1766,10 +1766,6 @@ function App() {
           setCurrentTaskId={setCurrentTaskId}
           tasks={tasks}
           playSound={playSound}
-          isCardLocked={isCardLocked}
-          getCardLevelReq={gclr}
-          handleLvlUp={handleLvlUpHandler}
-          handleLvlDown={handleLvlDownHandler}
           STACK_MODULES={STACK_MODULES}
           taskResults={results}
           teoriaTasks={teoriaTasks}

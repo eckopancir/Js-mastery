@@ -8,25 +8,40 @@ import {
   Terminal,
   List,
   Lock,
-  ArrowUpCircle,
-  ArrowDownCircle,
   CheckCircle,
   Layers,
   BookOpen,
   Shield,
-  TrendingUp,
-  Clock,
   Target,
   Flame,
   Award,
   Brain,
-  Hash,
   Globe,
   Server,
   Cpu,
+  PlayCircle,
+  Puzzle,
+  Eye,
+  Layout,
+  Bug,
 } from "lucide-react";
 import TheoryBlock from "./TheoryBlock";
 import TheoryHeader from "./TheoryHeader";
+
+const MODE_CONFIG = {
+  code: { label: "CODE", icon: <Code2 size={14} /> },
+  "output-predictor": { label: "OUTPUT", icon: <Eye size={14} /> },
+  "single-choice": { label: "QUIZ", icon: <Puzzle size={14} /> },
+  "multi-choice": { label: "MULTI", icon: <Puzzle size={14} /> },
+  "ui-layout": { label: "LAYOUT", icon: <Layout size={14} /> },
+  "bug-hunter": { label: "BUGS", icon: <Bug size={14} /> },
+};
+
+const DIFF_COLORS = {
+  Easy: "#3fb950",
+  Medium: "#d29922",
+  Hard: "#f85149",
+};
 
 const Sidebar = ({
   stats,
@@ -49,10 +64,6 @@ const Sidebar = ({
   setCurrentTaskId,
   tasks,
   playSound,
-  isCardLocked,
-  getCardLevelReq,
-  handleLvlUp,
-  handleLvlDown,
   STACK_MODULES,
   taskResults,
   teoriaTasks,
@@ -66,7 +77,6 @@ const Sidebar = ({
   isTheoryLocked,
   getCooldownRemaining,
 }) => {
-  const [lvlDownCard, setLvlDownCard] = useState(null);
   const [stackAnimKey, setStackAnimKey] = useState(0);
   const prevStackRef = useRef(currentStack);
   useEffect(() => {
@@ -120,16 +130,6 @@ const Sidebar = ({
 
   const totalSolved = getTotalSolved();
 
-  const getCardProgress = () => {
-    const cardNames = Object.keys(stats.cardStats || {});
-    const totalLevels = cardNames.reduce((sum, cn) => {
-      return sum + (stats.cardStats[cn]?.level || 0);
-    }, 0);
-    return { cards: cardNames.length, levels: totalLevels };
-  };
-
-  const cardProgress = getCardProgress();
-
   const CHAPTER_STACKS = [
     {
       name: "Frontend",
@@ -145,13 +145,50 @@ const Sidebar = ({
     {
       name: "Backend",
       icon: <Server size={16} />,
-      stacks: [
-        { id: "Go", icon: <Cpu size={16} />, label: "Go" },
-      ],
+      stacks: [{ id: "Go", icon: <Cpu size={16} />, label: "Go" }],
     },
   ];
 
+  const isTaskSolved = (t) => (stats.taskStats?.[t.id]?.passedCount || 0) > 0;
+  const isTaskCooldown = (t) => {
+    const ts = stats.taskStats?.[t.id];
+    if (!ts || !ts.passedCount) return false;
+    if (ts.cooldownUntil && ts.cooldownUntil > now) return true;
+    return false;
+  };
 
+  const renderTaskItem = (t) => {
+    const solved = isTaskSolved(t);
+    const cooldown = isTaskCooldown(t);
+    const isActive = currentTaskId === t.id;
+    const diffColor = DIFF_COLORS[t.difficulty] || DIFF_COLORS.Easy;
+
+    return (
+      <button
+        key={t.id}
+        className={`mode-task-item ${isActive ? "active" : ""} ${solved ? "solved" : ""} ${cooldown ? "cooldown" : ""}`}
+        onClick={() => {
+          if (cooldown) return;
+          playSound("click");
+          setCurrentTaskId(t.id);
+        }}
+        disabled={cooldown}
+      >
+        <div className="task-diff-vert" style={{ color: diffColor }}>
+          {(t.difficulty || "E").charAt(0)}
+        </div>
+        <div className="task-info-col">
+          <span className="task-title-text">{t.title}</span>
+        </div>
+        <div className="task-status-col">
+          {cooldown && <Lock size={12} className="task-lock-ico" />}
+          {solved && !cooldown && (
+            <CheckCircle size={12} className="task-check-ico" />
+          )}
+        </div>
+      </button>
+    );
+  };
 
   return (
     <aside className={`sidebar ${sidebarOpen ? "open" : "closed"}`}>
@@ -166,7 +203,7 @@ const Sidebar = ({
               <span>{currentStack}</span>{" "}
               <Zap size={14} className="logo-spark" />
             </div>
-              {showStackMenu && (
+            {showStackMenu && (
               <div className="stack-selector-menu">
                 {CHAPTER_STACKS.map((chapter) => (
                   <div key={chapter.name} className="chapter-group">
@@ -228,12 +265,14 @@ const Sidebar = ({
       </div>
 
       <div className="task-sidebar-list">
-        {activeTab === "editor" && sidebarOpen &&
+        {activeTab === "editor" &&
+          sidebarOpen &&
           (STACK_MODULES[currentStack] || ["Default"]).map((moduleName) => {
             const moduleTasks = tasks.filter((t) => {
               if (stats.deletedTaskIds?.includes(t.id)) return false;
               if (t.id >= 10001 && t.id <= 10006 && !showTour) return false;
-              if (currentStack !== "All" && t.id < 10000 && t.stack !== currentStack) return false;
+              if (currentStack !== "All" && t.id < 10000 && t.stack !== currentStack)
+                return false;
               if (t.module === moduleName) return true;
               return (
                 !t.module &&
@@ -243,18 +282,11 @@ const Sidebar = ({
               );
             });
 
-            const cardNames = [
-              ...new Set(moduleTasks.filter((t) => t.card).map((t) => t.card)),
-            ];
-            const nonCardTasks = moduleTasks.filter((t) => !t.card);
-
-            const activeCards = cardNames.filter((cn) => {
-              const cs = stats.cardStats[cn];
-              return !cs || !cs.hideUntil || cs.hideUntil <= now;
-            }).length;
-            const lockedCards = cardNames.length - activeCards;
+            if (moduleTasks.length === 0) return null;
 
             const isExpanded = expandedModules[moduleName];
+
+            const solvedInModule = moduleTasks.filter((t) => isTaskSolved(t)).length;
 
             return (
               <div key={moduleName} className="module-group">
@@ -274,490 +306,91 @@ const Sidebar = ({
                   </div>
                   <div className="module-stats">
                     <div className="mod-stat">
-                      <span className="mod-stat-label">CARDS</span>
-                      <span className="mod-stat-val active">{activeCards}</span>
+                      <span className="mod-stat-val">{solvedInModule}/{moduleTasks.length}</span>
                     </div>
-                    {lockedCards > 0 && (
-                      <div className="mod-stat">
-                        <span className="mod-stat-label">LOCKED</span>
-                        <span className="mod-stat-val locked">
-                          {lockedCards}
-                        </span>
-                      </div>
-                    )}
                   </div>
                 </button>
 
                 {isExpanded && (
-                  <div className={`module-tasks-container stack-switch-enter`}>
-                    {cardNames.length > 0
-                      ? cardNames.map((cardName) => {
-                          const cs = stats.cardStats[cardName] || {
-                            level: 1,
-                            hideUntil: 0,
-                          };
-                          const isCardActive =
-                            !cs.hideUntil || cs.hideUntil <= now;
-                          const isCardExpanded = expandedCards[cardName];
-                          const cardTasks = moduleTasks.filter(
-                            (t) => t.card === cardName,
-                          );
-                          const easyTasks = cardTasks.filter(
-                            (t) => t.difficulty === "Easy",
-                          );
-                          const mediumTasks = cardTasks.filter(
-                            (t) => t.difficulty === "Medium",
-                          );
-                          const hardTasks = cardTasks.filter(
-                            (t) => t.difficulty === "Hard",
-                          );
+                  <div className="module-tasks-container stack-switch-enter">
+                    {(() => {
+                      const modeGroups = {};
+                      moduleTasks.forEach((t) => {
+                        const mode = t.mode || "code";
+                        if (!modeGroups[mode]) modeGroups[mode] = [];
+                        modeGroups[mode].push(t);
+                      });
 
-                          const mediumUnlocked = cs.level >= 2;
-                          const hardUnlocked = cs.level >= 3;
+                      const sortedModes = Object.keys(modeGroups).sort((a, b) => {
+                        const order = ["code", "single-choice", "multi-choice", "output-predictor", "ui-layout", "bug-hunter"];
+                        return order.indexOf(a) - order.indexOf(b);
+                      });
 
-                          const isRandom = cs.level >= 4;
-                          let randomTasks = [];
-                          if (isRandom) {
-                            const all = [...cardTasks];
-                            const seed = cardName.length * 31 + cs.level;
-                            randomTasks = all
-                              .sort((a, b) => {
-                                const ha = ((a.id * 2654435761) ^ seed) >>> 0;
-                                const hb = ((b.id * 2654435761) ^ seed) >>> 0;
-                                return ha - hb;
-                              })
-                              .slice(0, 5);
-                          }
+                      return sortedModes.map((mode) => {
+                        const modeTasks = modeGroups[mode];
+                        const cfg = MODE_CONFIG[mode] || { label: mode.toUpperCase(), icon: <Code2 size={14} /> };
+                        const modeSolved = modeTasks.filter((t) => isTaskSolved(t)).length;
+                        const modeCooldown = modeTasks.filter((t) => isTaskCooldown(t)).length;
+                        const modeAvailable = modeTasks.length - modeCooldown;
+                        const modeKey = `${moduleName}-mode-${mode}`;
+                        const modeExpanded = expandedCards[modeKey];
 
-                          const easySolved = easyTasks.filter(
-                            (t) =>
-                              (stats.taskStats[t.id]?.passedCount || 0) > 0,
-                          ).length;
-                          const mediumSolved = mediumTasks.filter(
-                            (t) =>
-                              (stats.taskStats[t.id]?.passedCount || 0) > 0,
-                          ).length;
-                          const hardSolved = hardTasks.filter(
-                            (t) =>
-                              (stats.taskStats[t.id]?.passedCount || 0) > 0,
-                          ).length;
-
-                          let canLvlUp = false;
-                          if (cs.level >= 8) canLvlUp = false;
-                          else if (cs.level === 1)
-                            canLvlUp = easySolved >= easyTasks.length;
-                          else if (cs.level === 2)
-                            canLvlUp = mediumSolved >= mediumTasks.length;
-                          else if (cs.level === 3)
-                            canLvlUp = hardSolved >= hardTasks.length;
-                          else canLvlUp = true;
-
-                          const lvlClass = cs.level > 8 ? 8 : cs.level;
-
-                          if (!isCardActive) {
-                            const remainMs = cs.hideUntil - now;
-                            const remainSec = Math.ceil(remainMs / 1000);
-                            const remainStr =
-                              remainSec > 86400
-                                ? `${Math.ceil(remainSec / 86400)}d`
-                                : remainSec > 3600
-                                  ? `${Math.ceil(remainSec / 3600)}h`
-                                  : remainSec > 60
-                                    ? `${Math.ceil(remainSec / 60)}m`
-                                    : `${remainSec}s`;
-                            return (
-                              <div
-                                key={cardName}
-                                className={`card-item card-lvl-${lvlClass} card-locked`}
-                              >
-                                <div className="card-header-row">
-                                  <Lock size={14} className="card-lock-ico" />
-                                  <span className="card-name">{cardName}</span>
-                                  <span
-                                    className="card-ai-badge"
-                                    style={{
-                                      color: "#a8b2c1",
-                                      fontSize: "0.75rem",
-                                      marginLeft: "auto",
-                                    }}
-                                  >
-                                    {stats.cardAiPoints?.[cardName] || 0}/
-                                    {getCardLevelReq(cs.level).points} AI
-                                  </span>
-                                  <span className="card-level-badge">
-                                    Lvl {cs.level}
-                                  </span>
-                                </div>
-                                <div className="card-cooldown">
-                                  Cooldown: {remainStr}
-                                </div>
+                        return (
+                          <div key={mode} className="mode-group">
+                            <button
+                              className={`mode-group-header ${modeExpanded ? "expanded" : ""}`}
+                              onClick={() => {
+                                playSound("click");
+                                setExpandedCards((prev) => ({
+                                  ...prev,
+                                  [modeKey]: !prev[modeKey],
+                                }));
+                              }}
+                            >
+                              <div className="mode-header-left">
+                                <ChevronRight size={14} className={`mode-chevron ${modeExpanded ? "rotated" : ""}`} />
+                                {cfg.icon}
+                                <span className="mode-label">{cfg.label}</span>
                               </div>
-                            );
-                          }
-
-                          return (
-                            <div
-                              key={cardName}
-                              className={`card-item card-lvl-${lvlClass} 
-                                ${isCardExpanded ? "card-expanded" : ""} 
-                                ${isCardLocked(cardName) ? "card-frozen" : ""}`}
-                            >
-                              <button
-                                className="card-header-btn"
-                                disabled={isCardLocked(cardName)}
-                                onClick={() => {
-                                  if (isCardLocked(cardName)) return;
-                                  playSound("click");
-                                  setExpandedCards((prev) => ({
-                                    ...prev,
-                                    [cardName]: !prev[cardName],
-                                  }));
-                                  setSelectedCard(
-                                    isCardExpanded ? null : cardName,
-                                  );
-                                }}
-                              >
-                                <div className="card-header-row">
-                                  {isCardLocked(cardName) ? (
-                                    <Lock
-                                      size={14}
-                                      style={{
-                                        marginRight: "8px",
-                                        color: "#ff4b2b",
-                                      }}
-                                    />
-                                  ) : (
-                                    <ChevronRight
-                                      size={14}
-                                      className={`card-chevron ${isCardExpanded ? "rotated" : ""}`}
-                                    />
-                                  )}
-
-                                  <span className="card-name">{cardName}</span>
-
-                                  {isCardLocked(cardName) ? (
-                                    <span
-                                      className="card-timer"
-                                      style={{
-                                        marginLeft: "auto",
-                                        fontSize: "0.7rem",
-                                        color: "#ff4b2b",
-                                      }}
-                                    >
-                                      {Math.ceil(
-                                        (cs.hideUntil - Date.now()) /
-                                          (1000 * 60 * 60 * 24),
-                                      )}
-                                      d LEFT
-                                    </span>
-                                  ) : (
-                                    <span
-                                      className="card-ai-badge"
-                                      style={{
-                                        color: "#a8b2c1",
-                                        fontSize: "0.75rem",
-                                        marginLeft: "auto",
-                                      }}
-                                    >
-                                      {stats.cardAiPoints?.[cardName] || 0}/
-                                      {getCardLevelReq(cs.level).points} AI
-                                    </span>
-                                  )}
-
-                                  <span className={`card-level-badge${lvlDownCard === cardName ? ' lvl-down-anim' : ''}`}>
-                                    Lvl {cs.level}
+                              <div className="mode-header-right">
+                                <span className="mode-count available">{modeAvailable}</span>
+                                {modeCooldown > 0 && (
+                                  <span className="mode-count cooldown">
+                                    <Lock size={10} /> {modeCooldown}
                                   </span>
-                                </div>
+                                )}
+                                <span className="mode-count solved">{modeSolved}/{modeTasks.length}</span>
+                              </div>
+                            </button>
 
-                                <div className="card-progress-bar">
-                                  <div
-                                    className="card-progress-fill"
-                                    style={{
-                                      width: `${Math.min(100, ((easySolved + mediumSolved + hardSolved) / cardTasks.length) * 100)}%`,
-                                      filter: isCardLocked(cardName)
-                                        ? "grayscale(1)"
-                                        : "none",
-                                    }}
-                                  ></div>
-                                </div>
-                              </button>
-
-                              {isCardExpanded && (
-                                <div className="card-tasks-panel">
-                                  <div className="card-controls">
-                                    <button
-                                      className="card-ctrl-btn lvl-down"
-                                      onClick={() => {
-                                        setCurrentTaskId(cardTasks[0]?.id);
-                                        setLvlDownCard(cardName);
-                                        setTimeout(() => setLvlDownCard(null), 600);
-                                        handleLvlDown();
-                                      }}
-                                      title="LVL DOWN"
-                                    >
-                                      <ArrowDownCircle size={16} /> LVL DOWN
-                                    </button>
-
-                                    <button
-                                      className={`card-ctrl-btn lvl-up ${
-                                        canLvlUp &&
-                                        (stats.cardAiPoints?.[cardName] || 0) >=
-                                          getCardLevelReq(cs.level).points
-                                          ? "ready"
-                                          : "disabled"
-                                      }`}
-                                      onClick={(e) => {
-                                        if (
-                                          canLvlUp &&
-                                          (stats.cardAiPoints?.[cardName] ||
-                                            0) >=
-                                            getCardLevelReq(cs.level).points
-                                        ) {
-                                          setCurrentTaskId(cardTasks[0]?.id);
-                                          handleLvlUp(e);
-                                        }
-                                      }}
-                                      title={
-                                        !canLvlUp
-                                          ? "❌ Сначала решите все задачи\n✅ Нужно: " +
-                                            getCardLevelReq(cs.level).points +
-                                            " AI Points"
-                                          : (stats.cardAiPoints?.[cardName] ||
-                                                0) <
-                                              getCardLevelReq(cs.level).points
-                                            ? `✅ Решено: ${cardTasks.filter(t => stats.completedTasks?.[t.id]).length}/${cardTasks.length} задач\n❌ Нужно: ${getCardLevelReq(cs.level).points} AI Points (${stats.cardAiPoints?.[cardName] || 0}/${getCardLevelReq(cs.level).points})`
-                                            : "LVL UP - Нажмите для повышения уровня!"
-                                      }
-                                    >
-                                      <Lock size={16} className="lock-icon" />
-                                      <ArrowUpCircle size={16} className="arrow-icon" />
-                                      <span className="lvl-up-text">LVL UP</span>
-                                    </button>
-                                  </div>
-
-                                  {teoriaTasks && (
-                                    <TheoryHeader
-                                      teoriaTask={teoriaTasks.find(
-                                        (t) =>
-                                          t.card.toLowerCase() === cardName.toLowerCase() &&
-                                          t.module === moduleName &&
-                                          t.stack === currentStack,
-                                      )}
-                                      isOpen={theoryOpenCard === cardName}
-                                      onToggle={() => {
-                                        playSound("click");
-                                        setTheoryOpenCard(
-                                          theoryOpenCard === cardName
-                                            ? null
-                                            : cardName,
-                                        );
-                                      }}
-                                      results={theoryResults[cardName]}
-                                      isSubmitting={theorySubmitting}
-                                      isTheoryLocked={isTheoryLocked}
-                                      getCooldownRemaining={
-                                        getCooldownRemaining
-                                      }
-                                    />
-                                  )}
-
-                                  {!isRandom ? (
-                                    <>
-                                      <div className="tier-section">
-                                        <div className="tier-header easy">
-                                          EASY ({easySolved}/{easyTasks.length})
-                                        </div>
-                                        {easyTasks.map((t) => {
-                                          const ts =
-                                            stats.taskStats[t.id] || {};
-                                          return (
-                                            <button
-                                              key={t.id}
-                                              className={`tier-task-btn ${currentTaskId === t.id ? "active" : ""} ${ts.passedCount > 0 ? "solved" : ""}`}
-                                              onClick={() => {
-                                                playSound("click");
-                                                setCurrentTaskId(t.id);
-                                              }}
-                                            >
-                                              <span>{t.title}</span>
-                                              {ts.bestTime && (
-                                                <span className="task-best-time">
-                                                  {Math.floor(ts.bestTime / 60)}
-                                                  :
-                                                  {String(
-                                                    ts.bestTime % 60,
-                                                  ).padStart(2, "0")}
-                                                </span>
-                                              )}
-                                              {ts.passedCount > 0 && (
-                                                <CheckCircle
-                                                  size={12}
-                                                  className="task-check"
-                                                />
-                                              )}
-                                            </button>
-                                          );
-                                        })}
-                                      </div>
-                                      <div
-                                        className={`tier-section ${!mediumUnlocked ? "tier-locked" : ""}`}
-                                      >
-                                        <div className="tier-header medium">
-                                          MEDIUM ({mediumSolved}/
-                                          {mediumTasks.length}){" "}
-                                          {!mediumUnlocked && (
-                                            <Lock size={12} />
-                                          )}
-                                        </div>
-                                        {mediumUnlocked ? (
-                                          mediumTasks.map((t) => {
-                                            const ts =
-                                              stats.taskStats[t.id] || {};
-                                            return (
-                                              <button
-                                                key={t.id}
-                                                className={`tier-task-btn ${currentTaskId === t.id ? "active" : ""} ${ts.passedCount > 0 ? "solved" : ""}`}
-                                                onClick={() => {
-                                                  playSound("click");
-                                                  setCurrentTaskId(t.id);
-                                                }}
-                                              >
-                                                <span>{t.title}</span>
-                                                {ts.bestTime && (
-                                                  <span className="task-best-time">
-                                                    {Math.floor(
-                                                      ts.bestTime / 60,
-                                                    )}
-                                                    :
-                                                    {String(
-                                                      ts.bestTime % 60,
-                                                    ).padStart(2, "0")}
-                                                  </span>
-                                                )}
-                                                {ts.passedCount > 0 && (
-                                                  <CheckCircle
-                                                    size={12}
-                                                    className="task-check"
-                                                  />
-                                                )}
-                                              </button>
-                                            );
-                                          })
-                                        ) : (
-                                          <div className="tier-lock-msg">
-                                            Unlock at Level 2
-                                          </div>
-                                        )}
-                                      </div>
-                                      <div
-                                        className={`tier-section ${!hardUnlocked ? "tier-locked" : ""}`}
-                                      >
-                                        <div className="tier-header hard">
-                                          HARD ({hardSolved}/{hardTasks.length}){" "}
-                                          {!hardUnlocked && <Lock size={12} />}
-                                        </div>
-                                        {hardUnlocked ? (
-                                          hardTasks.map((t) => {
-                                            const ts =
-                                              stats.taskStats[t.id] || {};
-                                            return (
-                                              <button
-                                                key={t.id}
-                                                className={`tier-task-btn ${currentTaskId === t.id ? "active" : ""} ${ts.passedCount > 0 ? "solved" : ""}`}
-                                                onClick={() => {
-                                                  playSound("click");
-                                                  setCurrentTaskId(t.id);
-                                                }}
-                                              >
-                                                <span>{t.title}</span>
-                                                {ts.bestTime && (
-                                                  <span className="task-best-time">
-                                                    {Math.floor(
-                                                      ts.bestTime / 60,
-                                                    )}
-                                                    :
-                                                    {String(
-                                                      ts.bestTime % 60,
-                                                    ).padStart(2, "0")}
-                                                  </span>
-                                                )}
-                                                {ts.passedCount > 0 && (
-                                                  <CheckCircle
-                                                    size={12}
-                                                    className="task-check"
-                                                  />
-                                                )}
-                                              </button>
-                                            );
-                                          })
-                                        ) : (
-                                          <div className="tier-lock-msg">
-                                            Unlock at Level 3
-                                          </div>
-                                        )}
-                                      </div>
-                                    </>
-                                  ) : (
-                                    <div className="tier-section">
-                                      <div className="tier-header random">
-                                        RANDOM MIX (5 tasks)
-                                      </div>
-                                      {randomTasks.map((t) => {
-                                        const ts = stats.taskStats[t.id] || {};
-                                        return (
-                                          <button
-                                            key={t.id}
-                                            className={`tier-task-btn ${currentTaskId === t.id ? "active" : ""} ${ts.passedCount > 0 ? "solved" : ""}`}
-                                            onClick={() => {
-                                              playSound("click");
-                                              setCurrentTaskId(t.id);
-                                            }}
-                                          >
-                                            <span>{t.title}</span>
-                                            <span
-                                              className={`f-badge ${t.difficulty.toLowerCase()}`}
-                                            >
-                                              {t.difficulty}
-                                            </span>
-                                          </button>
-                                        );
-                                      })}
-                                    </div>
-                                  )}
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })
-                      : null}
-
-                    {nonCardTasks.length > 0 &&
-                      nonCardTasks.map((task) => (
-                        <button
-                          key={task.id}
-                          className={`sidebar-task-btn ${currentTaskId === task.id ? "active" : ""}`}
-                          onClick={() => {
-                            playSound("click");
-                            setCurrentTaskId(task.id);
-                          }}
-                        >
-                          <span className="sidebar-task-title">
-                            {task.title}
-                          </span>
-                          <div className="sidebar-task-meta">
-                            <span
-                              className={`f-badge ${task.difficulty.toLowerCase()}`}
-                            >
-                              {task.difficulty}
-                            </span>
+                            {modeExpanded && (
+                              <div className="mode-tasks-list">
+                                {modeTasks.map((t) => renderTaskItem(t))}
+                              </div>
+                            )}
                           </div>
-                        </button>
-                      ))}
+                        );
+                      });
+                    })()}
 
-                    {cardNames.length === 0 && nonCardTasks.length === 0 && (
-                      <div className="empty-module-msg">
-                        No active missions in this sector.
-                      </div>
+                    {teoriaTasks && (
+                      <TheoryHeader
+                        teoriaTask={teoriaTasks.find(
+                          (t) =>
+                            t.module === moduleName && t.stack === currentStack,
+                        )}
+                        isOpen={theoryOpenCard === moduleName}
+                        onToggle={() => {
+                          playSound("click");
+                          setTheoryOpenCard(
+                            theoryOpenCard === moduleName ? null : moduleName,
+                          );
+                        }}
+                        results={theoryResults[moduleName]}
+                        isSubmitting={theorySubmitting}
+                        isTheoryLocked={isTheoryLocked}
+                        getCooldownRemaining={getCooldownRemaining}
+                      />
                     )}
                   </div>
                 )}
@@ -816,7 +449,6 @@ const Sidebar = ({
 
             <div className="intel-breakdown">
               <div className="breakdown-title">
-                <Hash size={14} />
                 <span>Today's Breakdown</span>
               </div>
               <div className="breakdown-row">
@@ -824,9 +456,7 @@ const Sidebar = ({
                 <div className="diff-bar">
                   <div
                     className="diff-fill easy"
-                    style={{
-                      width: `${Math.min(100, (todayStats.easy || 0) * 20)}%`,
-                    }}
+                    style={{ width: `${Math.min(100, (todayStats.easy || 0) * 20)}%` }}
                   />
                 </div>
                 <span className="diff-count">{todayStats.easy || 0}</span>
@@ -836,9 +466,7 @@ const Sidebar = ({
                 <div className="diff-bar">
                   <div
                     className="diff-fill medium"
-                    style={{
-                      width: `${Math.min(100, (todayStats.medium || 0) * 20)}%`,
-                    }}
+                    style={{ width: `${Math.min(100, (todayStats.medium || 0) * 20)}%` }}
                   />
                 </div>
                 <span className="diff-count">{todayStats.medium || 0}</span>
@@ -848,24 +476,10 @@ const Sidebar = ({
                 <div className="diff-bar">
                   <div
                     className="diff-fill hard"
-                    style={{
-                      width: `${Math.min(100, (todayStats.hard || 0) * 20)}%`,
-                    }}
+                    style={{ width: `${Math.min(100, (todayStats.hard || 0) * 20)}%` }}
                   />
                 </div>
                 <span className="diff-count">{todayStats.hard || 0}</span>
-              </div>
-            </div>
-
-            <div className="intel-cards">
-              <div className="cards-title">
-                <Layers size={14} />
-                <span>Card Progress</span>
-              </div>
-              <div className="cards-stats">
-                <span>{cardProgress.cards} Cards</span>
-                <span className="separator">•</span>
-                <span>{cardProgress.levels} Levels</span>
               </div>
             </div>
 

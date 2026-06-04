@@ -5165,6 +5165,182 @@ body {
   box-shadow: 0 0 10px #ff4b2b;
 }
 
+/* ===== MODE GROUP ===== */
+.mode-group {
+  margin-bottom: 4px;
+}
+
+.mode-group-header {
+  width: 100%;
+  padding: 7px 10px;
+  background: rgba(74, 158, 255, 0.06);
+  border: 1px solid rgba(74, 158, 255, 0.15);
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #c8d6e5;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+}
+
+.mode-group-header:hover {
+  background: rgba(74, 158, 255, 0.12);
+  border-color: rgba(74, 158, 255, 0.3);
+}
+
+.mode-group-header.expanded {
+  background: rgba(74, 158, 255, 0.1);
+  border-color: rgba(74, 158, 255, 0.35);
+}
+
+.mode-header-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mode-chevron {
+  transition: transform 0.2s ease;
+  opacity: 0.5;
+}
+
+.mode-chevron.rotated {
+  transform: rotate(90deg);
+}
+
+.mode-label {
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+}
+
+.mode-header-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mode-count {
+  font-size: 0.65rem;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-weight: 600;
+}
+
+.mode-count.available {
+  background: rgba(63, 185, 80, 0.15);
+  color: #3fb950;
+}
+
+.mode-count.cooldown {
+  background: rgba(248, 81, 73, 0.12);
+  color: #f85149;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.mode-count.solved {
+  background: rgba(139, 148, 158, 0.12);
+  color: #8b949e;
+}
+
+.mode-tasks-list {
+  padding: 4px 0 4px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* ===== MODE TASK ITEM ===== */
+.mode-task-item {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  width: 100%;
+  padding: 6px 8px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  color: #c8d6e5;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  text-align: left;
+}
+
+.mode-task-item:hover:not(.cooldown) {
+  background: rgba(74, 158, 255, 0.08);
+  border-color: rgba(74, 158, 255, 0.2);
+}
+
+.mode-task-item.active {
+  background: rgba(74, 158, 255, 0.12);
+  border-color: rgba(74, 158, 255, 0.35);
+  box-shadow: 0 0 8px rgba(74, 158, 255, 0.1);
+}
+
+.mode-task-item.solved {
+  opacity: 0.55;
+}
+
+.mode-task-item.cooldown {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.task-diff-vert {
+  writing-mode: vertical-lr;
+  text-orientation: mixed;
+  font-size: 0.6rem;
+  font-weight: 900;
+  letter-spacing: 1px;
+  font-family: 'JetBrains Mono', monospace;
+  min-width: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-right: 6px;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  margin-right: 6px;
+}
+
+.task-info-col {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.task-title-text {
+  font-size: 0.78rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+
+.task-status-col {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  padding-left: 6px;
+}
+
+.task-lock-ico {
+  color: #f85149;
+  opacity: 0.7;
+}
+
+.task-check-ico {
+  color: #3fb950;
+}
+
 .lvl-card {
   position: relative;
   transition: transform 0.2s;
