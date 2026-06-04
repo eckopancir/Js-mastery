@@ -16,16 +16,22 @@ export const POINT_VALUES = {
 function buildPrompt(task) {
   const mode = task.mode;
   const diff = task.difficulty;
+  const stack = task.stack || "JavaScript";
+  const isGo = stack === "Go";
 
-  // Difficulty-specific instruction for prompt quality
-  const difficultyGuide = {
+  const langName = isGo ? "Go" : "JavaScript";
+  const langKeywords = isGo ? "Go, goroutines, каналы, интерфейсы, структуры" : "JavaScript, ES6+, замыкания, прототипы, async/await";
+
+  const difficultyGuide = isGo ? {
+    Easy: "Задача уровня Junior — базовые концепции Go: переменные, функции, срезы, структуры. Простые примеры.",
+    Medium: "Задача уровня Middle — горутины, каналы, интерфейсы, паттерны. Требует опыта в Go.",
+    Hard: "Задача уровня Senior — конкурентность, sync пакет, оптимизация, продвинутые паттерны Go.",
+  } : {
     Easy: "Задача уровня Junior — базовые концепции, простые примеры. Не слишком тривиально, но и не сложно.",
-    Medium:
-      "Задача уровня Middle — ловушки языка, неочевидное поведение, паттерны. Требует опыта.",
+    Medium: "Задача уровня Middle — ловушки языка, неочевидное поведение, паттерны. Требует опыта.",
     Hard: "Задача уровня Senior — тонкости спецификации ECMAScript, edge-cases, продвинутые концепции. Реальный уровень собеседования в топ-компанию.",
   };
 
-  // Mode-specific schema instructions
   const modeSchemas = {
     "single-choice": `{
   "title": "Короткое название задачи",
@@ -41,7 +47,14 @@ function buildPrompt(task) {
   "correctAnswer": ["Правильный A", "Правильный B"],
   "solution": "Объяснение"
 }`,
-    "output-predictor": `{
+    "output-predictor": isGo ? `{
+  "title": "Название",
+  "description": "Что выведет данный код?",
+  "initialCode": "func main() {\\n  x := 42\\n  fmt.Println(x)\\n}",
+  "expectedOutput": "42",
+  "correctAnswer": "42",
+  "solution": "Объяснение"
+}` : `{
   "title": "Название",
   "description": "Что выведет данный код?",
   "initialCode": "let x = 5;\\nconsole.log(x + 3);",
@@ -56,7 +69,12 @@ function buildPrompt(task) {
   "correctAnswer": 2,
   "solution": "Объяснение ошибки на строке 2"
 }`,
-    code: `{
+    code: isGo ? `{
+        "title": "Название",
+        "description": "Описание задачи",
+        "initialCode": "func solve(a, b int) int {\\n  // ваш код\\n}",
+        "solution": "func solve(a, b int) int {\\n  return a + b\\n}"
+      }` : `{
         "title": "Название",
         "description": "Описание задачи",
         "initialCode": "function solve(a, b) {\\n  // { params: [1, 2], expected: 3 }\\n  // ваш код\\n}",
@@ -72,31 +90,107 @@ function buildPrompt(task) {
       "КРИТИЧЕСКОЕ ПРАВИЛО: Это строго ТЕОРЕТИЧЕСКИЙ режим. В вопросе НЕ должно быть исходного кода. Спрашивай только про концепции, особенности спецификации или теорию. НЕ используй фразы 'что выведет код'.",
     "multi-choice":
       "КРИТИЧЕСКОЕ ПРАВИЛО: Это строго ТЕОРЕТИЧЕСКИЙ режим. Спрашивай теорию, где нужно выбрать несколько правильных утверждений. Код в вопросе давать нельзя.",
-    "output-predictor":
-      "КРИТИЧЕСКОЕ ПРАВИЛО: Режим предсказания вывода. Напиши блок кода (положи в initialCode) и спроси 'Что выведет этот код?'.",
-    "bug-hunter":
-      "КРИТИЧЕСКОЕ ПРАВИЛО: Найди баг. Напиши код с одной ошибкой. Строки должны начинаться с номера: '1: ...', '2: ...'.",
-    code: "КРИТИЧЕСКОЕ ПРАВИЛО: Задача на умение писать длинный код. Избегай написания сложных парсеров. Ориентируйся на манипуляции с массивами, объектами и строками.",
+    "output-predictor": isGo
+      ? "КРИТИЧЕСКОЕ ПРАВИЛО: Режим предсказания вывода. Напиши блок Go-кода (положи в initialCode) и спроси 'Что выведет этот код?'."
+      : "КРИТИЧЕСКОЕ ПРАВИЛО: Режим предсказания вывода. Напиши блок кода (положи в initialCode) и спроси 'Что выведет этот код?'.",
+    "bug-hunter": isGo
+      ? "КРИТИЧЕСКОЕ ПРАВИЛО: Найди баг в Go-коде. Напиши код с одной ошибкой. Строки должны начинаться с номера: '1: ...', '2: ...'."
+      : "КРИТИЧЕСКОЕ ПРАВИЛО: Найди баг. Напиши код с одной ошибкой. Строки должны начинаться с номера: '1: ...', '2: ...'.",
+    code: isGo
+      ? "КРИТИЧЕСКОЕ ПРАВИЛО: Задача на умение писать Go-код. Укажи только функцию и решение. НЕ добавляй tests или testTemplate."
+      : "КРИТИЧЕСКОЕ ПРАВИЛО: Задача на умение писать длинный код. Избегай написания сложных парсеров. Ориентируйся на манипуляции с массивами, объектами и строками.",
   };
 
-  return `Ты — генератор технических задач для платформы подготовки JavaScript разработчиков к собеседованиям.
+  // Извлекаем концепцию из заголовка и описания
+  const title = (task.title || "").toLowerCase();
+  const desc = (task.description || "").toLowerCase();
+  const combined = title + " " + desc;
 
-ОРИГИНАЛЬНАЯ ЗАДАЧА ДЛЯ РЕФРЕНСА:
+  function extractConcept() {
+    const rules = [
+      { keywords: ["палиндром", "строк", "символ"], concept: "строки, работа со строками" },
+      { keywords: ["map", "карт", "словар"], concept: "map (словари)" },
+      { keywords: ["замыкани", "closure"], concept: "замыкания (closures)" },
+      { keywords: ["сортиров", "sort"], concept: "сортировки" },
+      { keywords: ["поиск", "search"], concept: "поиск" },
+      { keywords: ["горутин", "goroutine"], concept: "горутины (concurrency)" },
+      { keywords: ["канал", "channel"], concept: "каналы (channels)" },
+      { keywords: ["указател", "pointer"], concept: "указатели" },
+      { keywords: ["интерфейс", "interface"], concept: "интерфейсы" },
+      { keywords: ["метод", "method", "struct", "структур"], concept: "структуры и методы" },
+      { keywords: ["ошибк", "error"], concept: "обработка ошибок" },
+      { keywords: ["рекурси", "factorial", "факториал"], concept: "рекурсия" },
+      { keywords: ["defer"], concept: "defer" },
+      { keywords: ["select"], concept: "select (каналы)" },
+      { keywords: ["mutex", "sync", "waitgroup"], concept: "sync (мьютексы, конкурентность)" },
+      { keywords: ["риз", "срез", "slice", "append"], concept: "срезы (slices)" },
+      { keywords: ["вариативн", "variadic"], concept: "variadic функции" },
+      { keywords: ["матриц", "transpose", "2d"], concept: "матрицы (2D срезы)" },
+      { keywords: ["параллел", "parallel", "fan"], concept: "параллелизм" },
+      { keywords: ["json"], concept: "JSON" },
+      { keywords: ["time", "врем"], concept: "работа со временем" },
+      { keywords: ["массив", "array"], concept: "массивы" },
+      { keywords: ["функци", "function", "return"], concept: "функции" },
+      { keywords: ["перемен", "var", "констант"], concept: "переменные и типы" },
+      { keywords: ["сумм", "sum"], concept: "суммирование" },
+      { keywords: ["reverse", "развер"], concept: "разворот" },
+      { keywords: ["уникал", "unique", "дубликат"], concept: "уникальные элементы" },
+      { keywords: ["фибоначч", "fibonacci"], concept: "числа Фибоначчи" },
+      { keywords: ["shutdown", "graceful"], concept: "graceful shutdown" },
+    ];
+
+    for (const rule of rules) {
+      if (rule.keywords.some(kw => combined.includes(kw))) {
+        return rule.concept;
+      }
+    }
+    return task.topic || "Go Syntax";
+  }
+
+  const detectedConcept = extractConcept();
+
+  return `Ты — генератор технических задач для платформы подготовки ${langName} разработчиков к собеседованиям.
+
+=== ИСХОДНАЯ ЗАДАЧА ===
 ${JSON.stringify(task, null, 2)}
 
-ИНСТРУКЦИИ:
-1. Сгенерируй НОВУЮ задачу на ту же тему: "${task.topic}"
-2. Сложность: ${diff}. ${difficultyGuide[diff] || difficultyGuide.Easy}
-3. Режим: "${mode}" — структура JSON должна точно соответствовать этой схеме:
+=== АНАЛИЗ ИСХОДНОЙ ЗАДАЧИ ===
+Заголовок: "${task.title}"
+Описание: "${task.description}"
+ОПРЕДЕЛЁННАЯ КОНЦЕПЦИЯ: "${detectedConcept}"
+Язык: ${langName}
+Сложность: ${diff}
+
+=== КРИТИЧЕСКОЕ ПРАВИЛО — СОВПАДЕНИЕ КОНЦЕПЦИИ ===
+Новая задача ОБЯЗАТЕЛЬНО должна касаться концепции "${detectedConcept}".
+
+Примеры ПРАВИЛЬНЫХ совпадений:
+  isPalindrome (строки) → isAnagram (строки) ✅
+  wordCount (map) → groupBy (map) ✅
+  counter (замыкания) → sequenceGenerator (замыкания) ✅
+  bubbleSort (сортировки) → insertionSort (сортировки) ✅
+
+Примеры НЕПРАВИЛЬНЫХ совпадений:
+  isPalindrome (строки) → sumSlice (числа) ❌
+  wordCount (map) → reverseSlice (срезы) ❌
+  counter (замыкания) → binarySearch (поиск) ❌
+  bubbleSort (сортировки) → channelDemo (каналы) ❌
+
+=== ПРАВИЛА ГЕНЕРАЦИИ ===
+1. Новая задача — ТОЛЬКО на концепцию "${detectedConcept}". НЕ отклоняйся от неё.
+2. Язык: ${langName}. Ключевые концепции: ${langKeywords}
+3. Сложность: ${diff}. ${difficultyGuide[diff] || difficultyGuide.Easy}
+4. Режим: "${mode}" — структура JSON точно по схеме:
 ${modeSchemas[mode] || modeSchemas["single-choice"]}
-4. Задача должна быть ДРУГОЙ по содержанию, но РАВНОЙ по сложности и теме
-5. Все тексты на РУССКОМ языке
-6. Для mode "code" — ОБЯЗАТЕЛЬНО включи массив tests с минимум 3 тестами
-7. Для mode "output-predictor" — ОБЯЗАТЕЛЬНО задай и expectedOutput И correctAnswer (одинаковое значение)
-8. Для mode "bug-hunter" — correctAnswer это ЧИСЛО (номер строки с ошибкой), initialCode пронумерован: "1: ...\n2: ..."
-9. НЕ копируй оригинальную задачу — придумай новую ситуацию на ту же тему
-10. Ответь ТОЛЬКО raw JSON объектом. Без markdown, без пояснений, без \`\`\`
-11. ${modeSpecificRules[mode] || ""}`;
+5. Задача должна быть ДРУГОЙ по содержанию, но ТОЙ ЖЕ концепции
+6. Все тексты на РУССКОМ языке
+7. Код пиши на языке ${langName}
+8. ${isGo ? "" : "Для mode \"code\" — ОБЯЗАТЕЛЬНО включи массив tests с минимум 3 тестами"}
+9. Для mode "output-predictor" — задай expectedOutput И correctAnswer (одинаковое значение)
+10. Для mode "bug-hunter" — correctAnswer это ЧИСЛО (номер строки), initialCode: "1: ...\n2: ..."
+11. НЕ копируй оригинальную задачу — придумай НОВУЮ ситуацию
+12. Ответь ТОЛЬКО raw JSON. Без markdown, без \`\`\`
+13. ${modeSpecificRules[mode] || ""}`;
 }
 
 export async function generateAiTask(originalTask) {

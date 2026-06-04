@@ -1823,6 +1823,88 @@ body {
   background: #0a0f0a;
 }
 
+.editor-frame {
+  position: absolute;
+  inset: 8px;
+  border: 2px solid #2980b9;
+  border-radius: 10px;
+  box-shadow:
+    0 0 15px rgba(41, 128, 185, 0.25),
+    inset 0 0 40px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.task-cubes-bar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+  background: rgba(5, 10, 5, 0.92);
+  border-top: 1px solid rgba(41, 128, 185, 0.2);
+  z-index: 20;
+  backdrop-filter: blur(6px);
+}
+
+.cubes-progress-track {
+  flex: 1;
+  height: 3px;
+  background: rgba(63, 185, 80, 0.12);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.cubes-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #238636, #3fb950);
+  border-radius: 2px;
+  transition: width 0.5s ease;
+}
+
+.cubes-row {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.task-cube {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  background: rgba(110, 118, 129, 0.25);
+  border: 1px solid rgba(110, 118, 129, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  cursor: default;
+}
+
+.task-cube.solved {
+  background: #238636;
+  border-color: #3fb950;
+  box-shadow: 0 0 6px rgba(63, 185, 80, 0.5);
+}
+
+.task-cube.solved svg {
+  color: #fff;
+}
+
+.task-cube.current {
+  border-color: #58a6ff;
+  box-shadow: 0 0 8px rgba(88, 166, 255, 0.4);
+}
+
+.cubes-counter {
+  font-size: 11px;
+  color: rgba(63, 185, 80, 0.8);
+  font-family: 'JetBrains Mono', monospace;
+  white-space: nowrap;
+}
+
 .workspace-resizer {
   width: 10px;
   height: 100%;

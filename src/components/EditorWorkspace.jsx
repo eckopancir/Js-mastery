@@ -24,6 +24,42 @@ import {
   Star,
 } from "lucide-react";
 
+const TaskCubes = ({ tasks, currentTask, stats, playSound }) => {
+  if (!currentTask.card || !tasks) return null;
+  const cardTasks = tasks.filter((t) => t.card === currentTask.card);
+  if (cardTasks.length === 0) return null;
+  const total = cardTasks.length;
+  const solved = cardTasks.filter(
+    (t) => (stats.taskStats?.[t.id]?.passedCount || 0) > 0,
+  ).length;
+  const progress = total > 0 ? (solved / total) * 100 : 0;
+  return (
+    <div className="task-cubes-bar">
+      <div className="cubes-progress-track">
+        <div className="cubes-progress-fill" style={{ width: `${progress}%` }} />
+      </div>
+      <div className="cubes-row">
+        {cardTasks.map((t, i) => {
+          const done = (stats.taskStats?.[t.id]?.passedCount || 0) > 0;
+          const current = t.id === currentTask.id;
+          return (
+            <div
+              key={`cube-${t.id}-${i}`}
+              className={`task-cube ${done ? "solved" : ""} ${current ? "current" : ""}`}
+              title={`${t.title} ${done ? "(solved)" : ""}`}
+            >
+              {done && <CheckCircle size={10} />}
+            </div>
+          );
+        })}
+      </div>
+      <span className="cubes-counter">
+        {solved}/{total}
+      </span>
+    </div>
+  );
+};
+
 const handleEditorWillMount = (monaco) => {
   monaco.editor.defineTheme("vs-tactical", {
     base: "vs-dark",
@@ -49,6 +85,7 @@ const handleEditorWillMount = (monaco) => {
 const EditorWorkspace = ({
   displayTask,
   currentTask,
+  tasks,
   code,
   setCode,
   cssCode,
@@ -410,6 +447,7 @@ const EditorWorkspace = ({
                 <p>GENERATING AI TASK...</p>
               </div>
             )}
+            <div className="editor-frame">
 
             {displayTask.mode === "ui-layout" ? (
               <div className="ui-editor-grid">
@@ -448,7 +486,11 @@ const EditorWorkspace = ({
                   <div className="box-label">Static Code</div>
                   <Editor
                     height="220px"
-                    defaultLanguage="javascript"
+                    defaultLanguage={
+                      displayTask.stack === "Go" ? "go"
+                      : displayTask.stack === "TypeScript" ? "typescript"
+                      : "javascript"
+                    }
                     theme="vs-dark"
                     value={displayTask.initialCode}
                     options={{
@@ -546,6 +588,8 @@ const EditorWorkspace = ({
                 language={
                   displayTask.stack === "TypeScript"
                     ? "typescript"
+                    : displayTask.stack === "Go"
+                    ? "go"
                     : "javascript"
                 }
                 theme="vs-tactical"
@@ -561,7 +605,13 @@ const EditorWorkspace = ({
                 }}
               />
             )}
-
+            <TaskCubes
+              tasks={tasks}
+              currentTask={currentTask}
+              stats={stats}
+              playSound={playSound}
+            />
+            </div>
             {showSolution && (
               <div className="solution-modal-overlay">
                 <div className="solution-modal">
@@ -643,12 +693,10 @@ const EditorWorkspace = ({
                           },
                         }));
                       }}
+                      beforeMount={handleEditorWillMount}
                       options={{
-                        fontSize: 16,
                         minimap: { enabled: false },
-                        scrollBeyondLastLine: false,
-                        wordWrap: "on",
-                        fontFamily: "'JetBrains Mono', monospace",
+                        fontSize: 14,
                       }}
                     />
                   </div>
@@ -659,7 +707,7 @@ const EditorWorkspace = ({
                       setShowNotes(false);
                     }}
                   >
-                    Close Notepad
+                    Save & Exit
                   </button>
                 </div>
               </div>

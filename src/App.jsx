@@ -1789,6 +1789,7 @@ function App() {
             <EditorWorkspace
               displayTask={displayTask}
               currentTask={currentTask}
+              tasks={tasks}
               code={code}
               setCode={setCode}
               cssCode={cssCode}

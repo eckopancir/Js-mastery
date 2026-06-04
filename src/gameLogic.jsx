@@ -367,6 +367,20 @@ export const validateCode = ({
       userAns.every((v, i) => String(v) === String(correctAns[i]));
     testResults = [{ passed: allPassed, actual: selectedAnswers.join(", ") }];
     finishValidation(allPassed, testResults);
+  } else if (displayTask.stack === "Go") {
+    const normalize = (s) => (s || "").replace(/\s+/g, "").replace(/\/\/.*/g, "");
+    const userCode = normalize(code);
+    const solCode = normalize(displayTask.solution || "");
+    const totalLen = solCode.length;
+    const minMatch = Math.max(10, Math.floor(totalLen * 0.8));
+    let matches = 0;
+    for (let i = 0; i <= solCode.length - minMatch; i++) {
+      const sub = solCode.slice(i, i + minMatch);
+      if (userCode.includes(sub)) { matches++; break; }
+    }
+    allPassed = matches > 0;
+    testResults = [{ passed: allPassed, actual: "Go code submitted" }];
+    finishValidation(allPassed, testResults);
   } else {
     const worker = new Worker(new URL("./runner.worker.js", import.meta.url), {
       type: "module",
